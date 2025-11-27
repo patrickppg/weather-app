@@ -1,0 +1,55 @@
+body {
+  margin: unset;
+}
+
+dl {
+  margin: unset;
+}
+
+dd {
+  margin: unset;
+}
+
+h1, h2 {
+  margin: unset;
+}
+
+p {
+  margin: unset;
+}
+
+ul {
+  margin: unset;
+  padding: unset;
+}
+
+button {
+  background: unset;
+  border: unset;
+  color: unset;
+  cursor: pointer;
+  font: unset;
+  padding: unset;
+}
+
+input {
+  background: unset;
+  border: unset;
+  font: unset;
+  padding: unset;
+
+  &::placeholder {
+    color: unset;
+    font: inherit;
+  }
+}
+
+svg {
+  fill: currentColor;
+}
+
+body {
+  margin-inline: auto;
+  max-width: 1216px;
+  padding: var(--spacing-12);
+}

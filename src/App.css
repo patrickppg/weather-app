@@ -1,0 +1,370 @@
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-weight: 700;
+  src: url("./assets/fonts/Bricolage_Grotesque/static/BricolageGrotesque-Bold.ttf");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-style: italic;
+  font-weight: 600;
+  src: url("./assets/fonts/DM_Sans/static/DMSans-SemiBoldItalic.ttf");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 300;
+  src: url("./assets/fonts/DM_Sans/static/DMSans-Light.ttf");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 500;
+  src: url("./assets/fonts/DM_Sans/static/DMSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 600;
+  src: url("./assets/fonts/DM_Sans/static/DMSans-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "DM Sans";
+  font-weight: 700;
+  src: url("./assets/fonts/DM_Sans/static/DMSans-Bold.ttf");
+}
+
+:root {
+  background: hsl(var(--color-neutral-7));
+  color: var(--color-neutral-1);
+  
+  --color-orange: 28, 100%, 52%;
+  --color-blue-light: 233, 67%, 56%;
+  --color-blue-dark: 248, 70%, 36%;
+  --color-neutral-1: white;
+  --color-neutral-2: 250, 6%, 84%;
+  --color-neutral-3: 240, 6%, 70%;
+  --color-neutral-4: 243, 23%, 30%;
+  --color-neutral-5: 243, 23%, 24%;
+  --color-neutral-6: 243, 27%, 20%;
+  --color-neutral-7: 243, 96%, 9%;
+
+  --radius-1: 4px;
+  --radius-2: 6px;
+  --radius-3: 8px;
+  --radius-4: 10px;
+  --radius-5: 12px;
+  --radius-6: 16px;
+  --radius-7: 20px;
+  --radius-8: 24px;
+
+  --spacing-1: 2px;
+  --spacing-2: 4px;
+  --spacing-3: 6px;
+  --spacing-4: 8px;
+  --spacing-5: 10px;
+  --spacing-6: 12px;
+  --spacing-7: 16px;
+  --spacing-8: 20px;
+  --spacing-9: 24px;
+  --spacing-10: 32px;
+  --spacing-11: 40px;
+  --spacing-12: 48px;
+  --spacing-13: 64px;
+  --spacing-14: 80px;
+  --spacing-15: 96px;
+  --spacing-16: 112px;
+  --spacing-17: 128px;
+  --spacing-18: 140px;
+  
+  --text-preset-1: 600 italic 6rem / 1 "DM Sans";
+  --text-preset-2: 700 3.25rem / 1.2 "Bricolage Grotesque";
+  --text-preset-3: 300 2rem / 1 "DM Sans";
+  --text-preset-4: 700 1.75rem / 1.2 "DM Sans";
+  --text-preset-5: 600 1.25rem / 1.2 "DM Sans";
+  --text-preset-6: 500 1.25rem / 1.2 "DM Sans";
+  --text-preset-7: 500 1.125rem / 1.2 "DM Sans";
+  --text-preset-8: 500 1rem / 1.2 "DM Sans";
+  --text-preset-9: 500 .875rem / 1.2 "DM Sans";
+}
+
+h1 {
+  font: var(--text-preset-2);
+}
+
+h2 {
+  font: var(--text-preset-5);
+}
+
+main {
+  display: grid;
+  gap: var(--spacing-10);
+  grid:
+    "search   search"
+    "overview hourly"
+    "details  hourly"
+    "daily    hourly"
+   / 1fr      24rem;
+}
+
+header#banner {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-13);
+}
+
+button#menu-units {
+  align-items: center;
+  background-color: hsl(var(--color-neutral-6));
+  border-radius: var(--radius-3);
+  box-sizing: border-box;
+  display: flex;
+  font: var(--text-preset-8);
+  gap: var(--spacing-5);
+  height: 2.625rem;
+  padding-inline: var(--spacing-7);
+}
+
+header#search {
+  align-items: center;
+  display: flex;
+  flex-flow: column;
+  gap: var(--spacing-13);
+  grid-area: search;
+  place-self: center;
+
+  > search {
+    display: flex;
+    font: var(--text-preset-6);
+    gap: var(--spacing-7);
+    height: 3.5rem;
+  }
+
+  input[type="search"] {
+    background: hsl(var(--color-neutral-6));
+    border-radius: var(--radius-5);
+    color: hsl(var(--color-neutral-2));
+    height: 100%;
+    padding-inline: calc(var(--spacing-9) + 1.25rem + calc(var(--spacing-7))) var(--spacing-9);
+    width: 32rem;
+
+    div:has(> &) {
+      position: relative;
+
+      &::before {
+        align-self: center;
+        aspect-ratio: 1;
+        background: url("/public/images/icon-search.svg") center / cover;
+        content: "";
+        height: 1.25rem;
+        left: var(--spacing-9);
+        position: absolute;
+      }
+    }
+  }
+
+  button[type="submit"] {
+    background: hsl(var(--color-blue-light));
+    border-radius: var(--radius-5);
+    cursor: pointer;
+    padding-inline: var(--spacing-9);
+  }
+}
+
+div#forecast-overview {
+  align-content: center;
+  background: url("/public/images/bg-today-large.svg") center / cover;
+  border-radius: var(--radius-7);
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--spacing-6) var(--spacing-8);
+  grid: 
+    "location condition temperature"
+    "date     condition temperature"
+   / 1fr      auto      auto;
+  grid-area: overview;
+  height: 18rem;
+  padding: var(--spacing-9);
+
+  & p.location {
+    font: var(--text-preset-4);
+    grid-area: location;
+    place-self: end start;
+  }
+
+  & p.date {
+    font: var(--text-preset-7);
+    grid-area: date;
+    opacity: .8;
+    place-self: start;
+  }
+
+  & p.condition {
+    grid-area: condition;
+
+    > img {
+      aspect-ratio: 1;
+      display: block;
+      height: 7.5rem;
+    }
+  }
+
+  & p.temperature {
+    font: var(--text-preset-1);
+    grid-area: temperature;
+    letter-spacing: -2px;
+    place-self: center;
+  }
+}
+
+dl#forecast-details {
+  display: flex;
+  gap: var(--spacing-9);
+  grid-area: details;
+
+  > div {
+    align-items: start;
+    background: hsl(var(--color-neutral-6));
+    border: 1px solid hsl(var(--color-neutral-4));
+    border-radius: var(--radius-5);
+    box-sizing: border-box;
+    display: flex;
+    flex: 1;
+    flex-flow: column;
+    gap: var(--spacing-9);
+    padding: var(--spacing-8);
+  }
+
+  & dt {
+    color: hsl(var(--color-neutral-2));
+    font: var(--text-preset-7);
+    width: max-content;
+  }
+
+  & dd {
+    font: var(--text-preset-3);
+  }
+}
+
+section#forecast-daily {
+  align-items: start;
+  display: flex;
+  flex-flow: column;
+  gap: var(--spacing-8);
+  grid-area: daily;
+
+  li.daily-forecast {
+    background: hsl(var(--color-neutral-6));
+    border: 1px solid hsl(var(--color-neutral-4));
+    border-radius: var(--radius-5);
+    box-sizing: border-box;
+    display: grid;
+    flex: none;
+    gap: var(--spacing-7);
+    grid: repeat(3, auto) / repeat(2, auto);
+    justify-items: center;
+    min-width: max-content;
+    padding: var(--spacing-7);
+    width: calc((100% - (6 * var(--spacing-7))) / 7);
+
+    ul:has(> &) {
+      display: flex;
+      gap: var(--spacing-7);
+      width: 100%;
+    }
+
+    .day {
+      font: var(--text-preset-7);
+      grid-column: span 2;
+    }
+
+    .icon {
+      grid-column: span 2;
+
+      > img {
+        aspect-ratio: 1;
+        display: block;
+        height: 3.75rem;
+      }
+    }
+
+    .maximum {
+      font: var(--text-preset-8);
+      justify-self: start;
+    }
+
+    .minimum {
+      color: hsl(var(--color-neutral-2));
+      font: var(--text-preset-8);
+      justify-self: end;
+    }
+  }
+}
+
+section#forecast-hourly {
+  background: hsl(var(--color-neutral-6));
+  border-radius: var(--radius-7);
+  display: grid;
+  gap: var(--spacing-7);
+  grid: auto 1fr / repeat(2, auto);
+  grid-area: hourly;
+  padding: var(--spacing-9);
+
+  li.hourly-forecast {
+    align-items: center;
+    background: hsl(var(--color-neutral-5));
+    border: 1px solid hsl(var(--color-neutral-4));
+    border-radius: var(--radius-3);
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--spacing-4);
+    grid: 
+      "icon hour temperature"
+     / auto 1fr  auto;
+    height: 3.75rem;
+    padding-inline: var(--spacing-7);
+
+    ul:has(> &) {
+      display: flex;
+      flex-flow: column;
+      gap: var(--spacing-7);
+      grid-column: span 2;
+    }
+
+    .icon {
+      grid-area: icon;
+
+      > img {
+        aspect-ratio: 1;
+        display: block;
+        height: 2.5rem;
+      }
+    }
+
+    .hour {
+      font: var(--text-preset-6);
+      grid-area: hour;
+      justify-self: start;
+    }
+
+    .temperature {
+      font: var(--text-preset-8);
+      grid-area: temperature;
+    }
+  }
+}
+
+.contents {
+  display: contents;
+}
+
+.visually-hidden {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: clip;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
