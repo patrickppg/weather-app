@@ -1,8 +1,18 @@
 import { useState } from 'react'
 import './App.css'
+import { getForecast, getLocation } from './utils'
 
 function App() {
   const [forecast, setForecast] = useState(initialForecast)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+    // const suggestions = await getLocationSuggestions(location)
+
+    const location = await getLocation(e.target.elements["location"].value)
+    setForecast(await getForecast(location))
+  }
   
   return (
     <>
@@ -18,25 +28,25 @@ function App() {
         <header id="search">
           <h1>How's the sky looking today?</h1>
           <search>
-            <form className="contents" action="get">
+            <form className="contents" action="get" onSubmit={handleSubmit}>
               <div>
-                <input type="search" placeholder="Search for a place..." aria-label="Location" />
+                <input type="search" name="location" placeholder="Search for a place..." aria-label="Location" />
               </div>
               <button type="submit">Search</button>
             </form>
           </search>
         </header>
         <div id="forecast-overview">
-          <p className="location">{`${forecast.location.city}, ${forecast.location.country}`}</p>
-          <p className="date">{forecast.date}</p>
-          <p className="condition"><img src="/images/icon-sunny.webp" alt="Sunny" /></p>
-          <p className="temperature">{forecast.temperature}</p>
+          <p className="location">{`${forecast.today.name}, ${forecast.today.country}`}</p>
+          <p className="date">{forecast.today.date}</p>
+          <p className="condition"><img src={forecast.today.condition.url} alt={forecast.today.condition.alt} /></p>
+          <p className="temperature">{`${forecast.today.temperature}°`}</p>
         </div>
         <dl id="forecast-details" aria-description="forecast details">
-          <div><dt>Feels Like</dt><dd>{forecast.feelsLike}</dd></div>
-          <div><dt>Humidity</dt><dd>{forecast.humidity}</dd></div>
-          <div><dt>Wind</dt><dd>{forecast.wind}</dd></div>
-          <div><dt>Precipitation</dt><dd>{forecast.precipitaion}</dd></div>
+          <div><dt>Feels Like</dt><dd>{`${forecast.today.feelsLike}°`}</dd></div>
+          <div><dt>Humidity</dt><dd>{`${forecast.today.humidity}%`}</dd></div>
+          <div><dt>Wind</dt><dd>{`${forecast.today.wind}km/h`}</dd></div>
+          <div><dt>Precipitation</dt><dd>{`${forecast.today.precipitation}mm`}</dd></div>
         </dl>
         <section id="forecast-daily">
           <h2>Daily forecast</h2>
@@ -44,9 +54,9 @@ function App() {
             {forecast.daily.map(item => (
               <li className="daily-forecast" key={item.day}>
                 <p className="day">{item.day}</p>
-                <p className="icon"><img src="/images/icon-sunny.webp" alt="Sunny" /></p>
-                <p className="maximum"><span className="visually-hidden">Maximum of </span>{item.maximum}</p>
-                <p className="minimum"><span className="visually-hidden">Minimum of </span>{item.minimum}</p>
+                <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
+                <p className="maximum"><span className="visually-hidden">Maximum of </span>{`${item.maximum}°`}</p>
+                <p className="minimum"><span className="visually-hidden">Minimum of </span>{`${item.minimum}°`}</p>
               </li>
             ))}
           </ul>
@@ -63,11 +73,11 @@ function App() {
             <option>Sunday</option>
           </select>
           <ul>
-            {forecast.hourly.map(item => (
+            {forecast.hourly[0].map(item => (
               <li className="hourly-forecast" key={item.hour}>
                 <p className="hour">{item.hour}</p>
-                <p className="icon"><img src="/images/icon-sunny.webp" alt="Sunny" /></p>
-                <p className="temperature">{item.temperature}</p>
+                <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
+                <p className="temperature">{`${item.temperature}°`}</p>
               </li>
             ))}
           </ul>
@@ -78,17 +88,19 @@ function App() {
 }
 
 const initialForecast = {
-  location: {
-    city: "Berlin",
-    country: "Germany",
+  today: {
+    condition: "sunny",
+    date: "Tuesday, Aug 5, 2025",
+    feelsLike: "18°",
+    humidity: "46%",
+    location: {
+      city: "Berlin",
+      country: "Germany",
+    },
+    precipitation: "0mm",
+    temperature: "20°",
+    wind: "14km/h",
   },
-  date: "Tuesday, Aug 5, 2025",
-  condition: "sunny",
-  temperature: "20°",
-  feelsLike: "18°",
-  humidity: "46%",
-  wind: "14km/h",
-  precipitaion: "0mm",
   daily: [
     {
       day: "Tue",
@@ -104,16 +116,18 @@ const initialForecast = {
     }
   ],
   hourly: [
-    {
-      hour: "3PM",
-      condition: "overcast",
-      temperature: "20°",
-    },
-    {
-      hour: "4PM",
-      condition: "partly cloudy",
-      temperature: "20°"
-    }
+    [
+      {
+        hour: "3PM",
+        condition: "overcast",
+        temperature: "20°",
+      },
+      {
+        hour: "4PM",
+        condition: "partly cloudy",
+        temperature: "20°"
+      }
+    ]
   ]
 }
 
