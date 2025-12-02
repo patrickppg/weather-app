@@ -304,6 +304,7 @@ section#forecast-daily {
 }
 
 section#forecast-hourly {
+  align-items: center;
   background: hsl(var(--color-neutral-6));
   border-radius: var(--radius-7);
   display: grid;
@@ -311,6 +312,58 @@ section#forecast-hourly {
   grid: auto 1fr / repeat(2, auto);
   grid-area: hourly;
   padding: var(--spacing-9);
+
+  select, ::picker(select) {
+    appearance: base-select;
+  }
+
+  select {
+    align-items: center;
+    background: hsl(var(--color-neutral-4));
+    border-radius: var(--radius-3);
+    font: var(--text-preset-8);
+    gap: var(--spacing-6);
+    height: 2.25rem;
+    justify-self: end;
+    padding-inline: var(--spacing-7);
+    width: fit-content;
+
+    &::picker-icon {
+      content: url("/public/images/icon-dropdown.svg");
+      transition: rotate .15s;
+    }
+
+    &:open::picker-icon {
+      rotate: 180deg;
+    }
+
+    option {
+      border-radius: var(--radius-3);
+      color: var(--color-neutral-1);
+      font: var(--text-preset-8);
+      height: 2.5rem;
+      outline: unset;
+      padding-inline: var(--spacing-4);
+
+      &:hover, &:focus-visible {
+        background: hsl(var(--color-neutral-5));
+      }
+
+      &::checkmark {
+        content: unset;
+      }
+    }
+  }
+
+  ::picker(select) {
+    background: hsl(var(--color-neutral-6));
+    border: 1px solid hsl(var(--color-neutral-4));
+    border-radius: var(--radius-5);
+    box-sizing: border-box;
+    gap: var(--spacing-2);
+    margin-block: var(--spacing-5);
+    padding: var(--spacing-4);
+  }
 
   li.hourly-forecast {
     align-items: center;

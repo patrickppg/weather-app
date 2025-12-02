@@ -1,15 +1,16 @@
 import { useState } from 'react'
-import './App.css'
 import { getForecast, getLocation } from './utils'
+import './App.css'
 
 function App() {
   const [forecast, setForecast] = useState(initialForecast)
+  const [selectedDay, setSelectedDay] = useState(0) // Monday = 0; Tuesday = 1; ...
+  console.log(selectedDay)
 
   async function handleSubmit(e) {
     e.preventDefault()
 
     // const suggestions = await getLocationSuggestions(location)
-
     const location = await getLocation(e.target.elements["location"].value)
     setForecast(await getForecast(location))
   }
@@ -29,9 +30,7 @@ function App() {
           <h1>How's the sky looking today?</h1>
           <search>
             <form className="contents" action="get" onSubmit={handleSubmit}>
-              <div>
-                <input type="search" name="location" placeholder="Search for a place..." aria-label="Location" />
-              </div>
+              <div><input type="search" name="location" placeholder="Search for a place..." aria-label="Location" /></div>
               <button type="submit">Search</button>
             </form>
           </search>
@@ -63,17 +62,17 @@ function App() {
         </section>
         <section id="forecast-hourly">
           <h2>Hourly forecast</h2>
-          <select>
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
-            <option>Saturday</option>
-            <option>Sunday</option>
+          <select value={selectedDay} onChange={(e) => setSelectedDay(Number(e.target.value))}>
+            <option value="0">Monday</option>
+            <option value="1">Tuesday</option>
+            <option value="2">Wednesday</option>
+            <option value="3">Thursday</option>
+            <option value="4">Friday</option>
+            <option value="5">Saturday</option>
+            <option value="6">Sunday</option>
           </select>
           <ul>
-            {forecast.hourly[0].map(item => (
+            {forecast.hourly[selectedDay].map(item => (
               <li className="hourly-forecast" key={item.hour}>
                 <p className="hour">{item.hour}</p>
                 <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>

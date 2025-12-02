@@ -53,3 +53,15 @@ body {
   max-width: 1216px;
   padding: var(--spacing-12);
 }
+
+select {
+  border: unset;
+  color: unset;
+  cursor: pointer;
+  font: unset;
+}
+
+option {
+  color: unset;
+  font: unset;
+}
