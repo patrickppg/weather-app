@@ -187,3 +187,18 @@ export function getCondition(code) {
 
   return { url, alt }
 }
+
+export function getTemperature(celsiusTemp, toScale) {
+  if (toScale === "c") return celsiusTemp
+  else if (toScale === "f") return Math.round(1.8 * celsiusTemp + 32)
+}
+
+export function getWind(kmhWind, toScale) {
+  if (toScale === "km/h") return `${kmhWind}km/h`
+  else if (toScale === "mph") return `${Math.round(kmhWind * 0.621371)}mph`
+}
+
+export function getPrecipitation(mmPrec, toScale) {
+  if (toScale === "mm") return `${mmPrec}mm`
+  else if (toScale === "in") return `${Math.round(mmPrec / 25.4)}in`
+}

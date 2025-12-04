@@ -27,7 +27,7 @@ button {
   background: unset;
   border: unset;
   color: unset;
-  cursor: pointer;
+  /* cursor: pointer; */
   font: unset;
   padding: unset;
 }
@@ -57,11 +57,16 @@ body {
 select {
   border: unset;
   color: unset;
-  cursor: pointer;
+  /* cursor: pointer; */
   font: unset;
 }
 
 option {
   color: unset;
   font: unset;
+}
+
+[popover] {
+  color: unset;
+  margin: unset;
 }
