@@ -38,6 +38,7 @@
 :root {
   background: hsl(var(--color-neutral-7));
   color: var(--color-neutral-1);
+  scrollbar-gutter: stable;
   
   --color-orange: 28, 100%, 52%;
   --color-blue-light: 233, 67%, 56%;
@@ -197,24 +198,34 @@ header#search {
   grid-area: search;
   place-self: center;
 
-  > search {
+  search {
+    align-items: center;
     display: flex;
+    flex-flow: column;
     font: var(--text-preset-6);
+    gap: var(--spacing-12);
+  }
+
+  form {
+    display: flex;
     gap: var(--spacing-7);
     height: 3.5rem;
   }
 
-  input[type="search"] {
+  input[name="location"] {
+    anchor-name: --input-search;
+    appearance: none;
     background: hsl(var(--color-neutral-6));
     border-radius: var(--radius-5);
+    box-sizing: border-box;
     color: hsl(var(--color-neutral-2));
     height: 100%;
-    padding-inline: calc(var(--spacing-9) + 1.25rem + calc(var(--spacing-7))) var(--spacing-9);
+    padding-inline: calc(var(--spacing-9) + 1.25rem + var(--spacing-7)) calc(var(--spacing-9) + 24px + var(--spacing-7));
     width: 32rem;
 
     div:has(> &) {
       position: relative;
-
+      
       &::before {
         align-self: center;
         aspect-ratio: 1;
@@ -223,6 +234,58 @@ header#search {
         height: 1.25rem;
         left: var(--spacing-9);
         position: absolute;
+      }      
+    }
+  }
+
+  button.clear-field {
+    align-self: center;
+    inset: 0 var(--spacing-9) 0 auto;
+    position: absolute;
+    width: fit-content;
+
+    & svg {
+      color: hsl(var(--color-neutral-2));
+      display: block;
+    }
+
+    input[name="location"]:placeholder-shown ~ & {
+      display: none;
+    }
+  }
+
+  [role="listbox"] {
+    background: hsl(var(--color-neutral-6));
+    border-radius: var(--radius-5);
+    box-sizing: border-box;
+    flex-flow: column;
+    inset-block: var(--spacing-5);
+    max-height: 100%;
+    overflow: auto;
+    padding: var(--spacing-4);
+    position-anchor: --input-search;
+    position-area: bottom center;
+    scrollbar-color: hsl(var(--color-neutral-4)) transparent;
+    scroll-padding: var(--spacing-4);
+    scrollbar-width: thin;
+    width: 100%;
+    
+    &:popover-open {
+      display: flex;
+    }
+
+    [role="option"] {
+      align-content: center;
+      border-radius: var(--radius-3);
+      cursor: default;
+      flex: none;
+      font: var(--text-preset-8);
+      height: 2.5rem;
+      outline: unset;
+      padding-inline: var(--spacing-4);
+
+      &:hover, &[aria-selected="true"] {
+        background: hsl(var(--color-neutral-5));
       }
     }
   }
@@ -231,6 +294,10 @@ header#search {
     background: hsl(var(--color-blue-light));
     border-radius: var(--radius-5);
     padding-inline: var(--spacing-9);
+  }
+
+  [role="alert"] {
+    font: var(--text-preset-4);
   }
 }
 

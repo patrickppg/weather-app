@@ -1,22 +1,55 @@
 import { DateTime } from "luxon"
 
-// async function getLocationSuggestions(location) {
-//   try {
-//     const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${location}&count=5`)
-//     const data = await response.json()
-//     const suggestions = data.results.map(item => ({
-//       name: item.name,
-//       admin1: item.admin1,
-//       country: item.country,
-//       latitude: item.latitude,
-//       longitude: item.longitude
-//     }))
+export async function getLocationSuggestions(searchInput) {
+  const parts = searchInput.split(",")
 
-//     return suggestions
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
+  let search, suggestions
+  switch (parts.length) {
+    case 1: {
+      search = parts[0].trim()
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+      suggestions = data.results
+      break
+    }
+
+    case 2: {
+      search = `${parts[0].trim()}, ${parts[1].trim()}`
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+
+      if (data.results) suggestions = data.results
+      else {
+        search = parts[0].trim()
+        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+        const data = await response.json()
+        suggestions = data.results.filter(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
+      }
+      break
+    }
+
+    case 3: {
+      search = `${parts[0].trim()}, ${parts[2].trim()}`
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+      suggestions = data.results.filter(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
+      break
+    }
+  }
+  
+  if (!suggestions) return []
+
+  return suggestions
+    .filter(suggestion => suggestion.admin1 && suggestion.country)
+    .map(suggestion => ({
+      id: String(suggestion.id),
+      name: suggestion.name,
+      admin: suggestion.admin1,
+      country: suggestion.country,
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude
+    }))
+}
 
 export async function getForecast(location) {
   try {
@@ -38,12 +71,12 @@ export async function getForecast(location) {
 
     const forecast = {
       today: {
+        admin: location.admin,
         condition: getCondition(data.current.weather_code),
         country: location.country,
         date: getDate(data.current.time, data.timezone),
         feelsLike: Math.round(data.current.apparent_temperature),
         humidity: data.current.relative_humidity_2m,
-        location: `${data.latitude}, ${data.longitude}`,
         name: location.name,
         precipitation: data.current.precipitation,
         temperature: Math.round(data.current.temperature_2m),
@@ -104,19 +137,50 @@ export function getHour(date, timezone) {
     .toLocaleString({ hour: "numeric" })
 }
 
-export async function getLocation(location) {
-  const params = new URLSearchParams()
-  params.append("name", location)
-  params.append("count", "5")
-  const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?${params}`)
-  const data = await response.json()
+export async function getLocation(searchInput) {
+  const parts = searchInput.split(",")
 
+  let search, location
+  switch (parts.length) {
+    case 1: {
+      search = parts[0].trim()
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+      location = data.results?.[0]
+      break
+    }
+
+    case 2: {
+      search = `${parts[0].trim()}, ${parts[1].trim()}`
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+
+      if (data.results) location = data.results?.[0]
+      else {
+        search = parts[0].trim()
+        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+        const data = await response.json()
+        location = data.results?.find(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
+      }
+      break
+    }
+
+    case 3: {
+      search = `${parts[0].trim()}, ${parts[2].trim()}`
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const data = await response.json()
+      location = data.results?.find(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
+      break
+    }
+  }
+
+  if (!location) return null
   return {
-    name: data.results[0].name,
-    admin1: data.results[0].admin1,
-    country: data.results[0].country,
-    latitude: data.results[0].latitude,
-    longitude: data.results[0].longitude,
+    name: location.name,
+    admin: location.admin1,
+    country: location.country,
+    latitude: location.latitude,
+    longitude: location.longitude,
   }
 }
 

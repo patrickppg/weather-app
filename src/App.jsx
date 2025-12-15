@@ -1,25 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import './App.css'
+import { getForecast, getLocation, getLocationSuggestions, getPrecipitation, getTemperature, getWind } from './utils'
+import debounce from 'lodash.debounce'
 import useMenuPattern from './hooks/useMenuPattern'
-import { getForecast, getLocation, getPrecipitation, getTemperature, getWind } from './utils'
+import './App.css'
 
 function App() {
   const [units, setUnits] = useState(initialUnits)
   const [forecast, setForecast] = useState(initialForecast)
-  const [selectedDay, setSelectedDay] = useState(0) // Monday = 0; Tuesday = 1; ...
+  const [locationSuggestions, setLocationSuggestions] = useState([])
+  const [selectedDay, setSelectedDay] = useState(0)
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState("")
   const [isMenuUnitsOpen, setIsMenuUnitsOpen] = useState(false)
+  const [isListboxSuggestionsOpen, setIsListboxSuggestionsOpen] = useState(false)
 
+  const refForm = useRef(null)
   const refMenu = useRef(null)
+  const refListbox = useRef(null)
+  const refSearchbox = useRef(null)
   
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    // const suggestions = await getLocationSuggestions(location)
-    const location = await getLocation(e.target.elements["location"].value)
-    setForecast(await getForecast(location))
-  }
-
-  function handleToggle(e) {
+  function handleMenuToggle(e) {
     if (e.newState === "closed") setIsMenuUnitsOpen(false)
     else if (e.newState === "open") setIsMenuUnitsOpen(true)
   }
@@ -42,10 +41,125 @@ function App() {
     }
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+    const location = await getLocation(e.target.elements["location"].value)
+ 
+    debouncedGetSuggestions.current.cancel()
+    setIsListboxSuggestionsOpen(false)
+    setForecast(location ? await getForecast(location) : null)
+  }
+
+  const debouncedGetSuggestions = useRef(
+    debounce(async (searchInput) => {
+      const suggestions = await getLocationSuggestions(searchInput)
+      setLocationSuggestions(suggestions)
+      setSelectedSuggestionId("")
+      if (suggestions.length) setIsListboxSuggestionsOpen(true)
+      else setIsListboxSuggestionsOpen(false)
+    }, 1000)
+  )
+
+  function handleSearchChange(e) {
+    if (e.target.value.length < 3) {
+      setLocationSuggestions([])
+      setIsListboxSuggestionsOpen(false)
+      debouncedGetSuggestions.current.cancel()
+    }
+    else debouncedGetSuggestions.current(e.target.value)
+  }
+
+  function handleSearchKeyDown(e) {
+    const handledKeys = ["ArrowUp", "ArrowDown", "Home", "End", "Enter", "Escape"]
+    if (!handledKeys.includes(e.code)) return
+    e.preventDefault()
+
+    switch (e.code) {
+      case "Enter":
+        setIsListboxSuggestionsOpen(false)
+        e.target.form.requestSubmit()
+        return
+
+      case "Escape":
+        setIsListboxSuggestionsOpen(false)
+        refSearchbox.current.value = ""
+        return
+    }
+
+    if (!isListboxSuggestionsOpen) return
+    const suggestionsList = document.getElementById(e.target.getAttribute("aria-controls"))
+    const firstSuggestion = suggestionsList.firstElementChild
+    const lastSuggestion = suggestionsList.lastElementChild
+    const activeSuggestion = document.getElementById(selectedSuggestionId)
+    const previousSuggestion = activeSuggestion
+      ? activeSuggestion.previousElementSibling || lastSuggestion
+      : null
+    const nextSuggestion = activeSuggestion
+      ? activeSuggestion.nextElementSibling || firstSuggestion
+      : null
+
+    let targetSuggestion
+    switch (e.code) {
+      case "ArrowUp":
+        if (activeSuggestion) targetSuggestion = previousSuggestion
+        else targetSuggestion = lastSuggestion
+        break
+
+      case "ArrowDown":
+        if (activeSuggestion) targetSuggestion = nextSuggestion
+        else targetSuggestion = firstSuggestion
+        break
+
+      case "Home":
+        targetSuggestion = firstSuggestion
+        break
+
+      case "End":
+        targetSuggestion = lastSuggestion
+        break
+    }
+
+    targetSuggestion.scrollIntoView({ block: "nearest" })
+    setSelectedSuggestionId(targetSuggestion.id)
+    refSearchbox.current.value = targetSuggestion.innerText
+  }
+
+  function handleSearchBlur(e) {
+    if (!document.hasFocus()) return
+    if (e.relatedTarget === document.getElementById("listbox-suggestions")) return
+    if (document.getElementById("listbox-suggestions").contains(e.relatedTarget)) return
+
+    setIsListboxSuggestionsOpen(false)
+  }
+
+  function handleSuggestionClick(e) {
+    if (e.target.role !== "option") return
+    setIsListboxSuggestionsOpen(false)
+    refSearchbox.current.value = e.target.innerText
+    refForm.current.requestSubmit()
+  }
+
+  function handleSuggestionsToggle(e) {
+    if (e.newState === "closed") setIsListboxSuggestionsOpen(false)
+    else if (e.newState === "open") setIsListboxSuggestionsOpen(true)
+  }
+
+  function handleClearSearchClick() {
+    setIsListboxSuggestionsOpen(false)
+    refSearchbox.current.value = ""
+    refSearchbox.current.focus()
+  }
+  
   useEffect(() => {
     if (isMenuUnitsOpen) refMenu.current.showPopover()
     else refMenu.current.hidePopover()
   }, [isMenuUnitsOpen])
+
+  useEffect(() => {
+    if (isListboxSuggestionsOpen) refListbox.current.showPopover()
+    else refListbox.current.hidePopover()
+  }, [isListboxSuggestionsOpen])
 
   useMenuPattern(refMenu)
 
@@ -58,7 +172,7 @@ function App() {
           Units
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="8" viewBox="0 0 13 8"><path d="M6.309 7.484 1.105 2.316c-.175-.14-.175-.421 0-.597l.704-.668a.405.405 0 0 1 .597 0l4.219 4.148 4.184-4.148c.175-.176.457-.176.597 0l.703.668c.176.176.176.457 0 .597L6.906 7.484a.405.405 0 0 1-.597 0Z"/></svg>  
         </button>
-        <div id="menu-items-popup" role="menu" popover="auto" ref={refMenu} onToggle={handleToggle}>
+        <div id="menu-items-popup" role="menu" popover="auto" ref={refMenu} onToggle={handleMenuToggle}>
           <div
             role="menuitem"
             onClick={handleSwitchUnitClick}>
@@ -114,58 +228,109 @@ function App() {
         <header id="search">
           <h1>How's the sky looking today?</h1>
           <search>
-            <form className="contents" action="get" onSubmit={handleSubmit}>
-              <div><input type="search" name="location" placeholder="Search for a place..." aria-label="Location" /></div>
+            <form ref={refForm} onSubmit={handleSubmit}>
+              <div>
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Search for a place..."
+                  required
+                  pattern=".*\S.*"
+                  autoComplete="off"
+                  spellCheck="false"
+                  aria-label="Location"
+                  aria-description="Use the Up and Down arrow keys to navigate between suggestions and Enter to search"
+                  aria-activedescendant={selectedSuggestionId || null}
+                  aria-controls="listbox-suggestions"
+                  ref={refSearchbox}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleSearchKeyDown}
+                  onBlur={handleSearchBlur}
+                  onInvalid={(e) => e.preventDefault()} />
+                <button
+                  className="clear-field"
+                  type="button"
+                  aria-label="Clear Field"
+                  onClick={handleClearSearchClick}
+                  onMouseDown={e => e.preventDefault()}>
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                </button>
+                <div
+                  role="listbox"
+                  id="listbox-suggestions"
+                  aria-label="Autocompletion Suggestions"
+                  popover="manual"
+                  tabIndex="-1"
+                  ref={refListbox}
+                  onClick={handleSuggestionClick}
+                  onToggle={handleSuggestionsToggle}>
+                  {locationSuggestions.map(suggestion => (
+                    <div
+                      role="option"
+                      id={suggestion.id}
+                      tabIndex="-1"
+                      aria-selected={suggestion.id === selectedSuggestionId}
+                      key={suggestion.id}>
+                      {`${suggestion.name}, ${suggestion.admin}, ${suggestion.country}`}
+                    </div>
+                  ))}
+                </div>
+              </div>
               <button type="submit">Search</button>
             </form>
+            <div hidden={forecast} role="alert">No search result found!</div>
           </search>
         </header>
-        <div id="forecast-overview">
-          <p className="location">{`${forecast.today.name}, ${forecast.today.country}`}</p>
-          <p className="date">{forecast.today.date}</p>
-          <p className="condition"><img src={forecast.today.condition.url} alt={forecast.today.condition.alt} /></p>
-          <p className="temperature">{`${getTemperature(forecast.today.temperature, units.temperature)}°`}</p>
-        </div>
-        <dl id="forecast-details" aria-description="forecast details">
-          <div><dt>Feels Like</dt><dd>{`${getTemperature(forecast.today.feelsLike, units.temperature)}°`}</dd></div>
-          <div><dt>Humidity</dt><dd>{`${forecast.today.humidity}%`}</dd></div>
-          <div><dt>Wind</dt><dd>{getWind(forecast.today.wind, units.wind)}</dd></div>
-          <div><dt>Precipitation</dt><dd>{`${getPrecipitation(forecast.today.precipitation, units.precipitation)}`}</dd></div>
-        </dl>
-        <section id="forecast-daily">
-          <h2>Daily forecast</h2>
-          <ul>
-            {forecast.daily.map(item => (
-              <li className="daily-forecast" key={item.day}>
-                <p className="day">{item.day}</p>
-                <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
-                <p className="maximum"><span className="visually-hidden">Maximum of </span>{`${getTemperature(item.maximum, units.temperature)}°`}</p>
-                <p className="minimum"><span className="visually-hidden">Minimum of </span>{`${getTemperature(item.minimum, units.temperature)}°`}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-        <section id="forecast-hourly">
-          <h2>Hourly forecast</h2>
-          <select value={selectedDay} onChange={(e) => setSelectedDay(Number(e.target.value))}>
-            <option value="0">Monday</option>
-            <option value="1">Tuesday</option>
-            <option value="2">Wednesday</option>
-            <option value="3">Thursday</option>
-            <option value="4">Friday</option>
-            <option value="5">Saturday</option>
-            <option value="6">Sunday</option>
-          </select>
-          <ul>
-            {forecast.hourly[selectedDay].map(item => (
-              <li className="hourly-forecast" key={item.hour}>
-                <p className="hour">{item.hour}</p>
-                <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
-                <p className="temperature">{`${getTemperature(item.temperature, units.temperature)}°`}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
+        {forecast &&
+        <>
+          <div id="forecast-overview">
+            <p className="location">{`${forecast.today.name}, ${forecast.today.admin}`}<br />{forecast.today.country}</p>
+            <p className="date">{forecast.today.date}</p>
+            <p className="condition"><img src={forecast.today.condition.url} alt={forecast.today.condition.alt} /></p>
+            <p className="temperature">{`${getTemperature(forecast.today.temperature, units.temperature)}°`}</p>
+          </div>
+          <dl id="forecast-details" aria-description="forecast details">
+            <div><dt>Feels Like</dt><dd>{`${getTemperature(forecast.today.feelsLike, units.temperature)}°`}</dd></div>
+            <div><dt>Humidity</dt><dd>{`${forecast.today.humidity}%`}</dd></div>
+            <div><dt>Wind</dt><dd>{getWind(forecast.today.wind, units.wind)}</dd></div>
+            <div><dt>Precipitation</dt><dd>{`${getPrecipitation(forecast.today.precipitation, units.precipitation)}`}</dd></div>
+          </dl>
+          <section id="forecast-daily">
+            <h2>Daily forecast</h2>
+            <ul>
+              {forecast.daily.map(item => (
+                <li className="daily-forecast" key={item.day}>
+                  <p className="day">{item.day}</p>
+                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
+                  <p className="maximum"><span className="visually-hidden">Maximum of </span>{`${getTemperature(item.maximum, units.temperature)}°`}</p>
+                  <p className="minimum"><span className="visually-hidden">Minimum of </span>{`${getTemperature(item.minimum, units.temperature)}°`}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section id="forecast-hourly">
+            <h2>Hourly forecast</h2>
+            <select value={selectedDay} onChange={(e) => setSelectedDay(Number(e.target.value))}>
+              <option value="0">Monday</option>
+              <option value="1">Tuesday</option>
+              <option value="2">Wednesday</option>
+              <option value="3">Thursday</option>
+              <option value="4">Friday</option>
+              <option value="5">Saturday</option>
+              <option value="6">Sunday</option>
+            </select>
+            <ul>
+              {forecast.hourly[selectedDay].map(item => (
+                <li className="hourly-forecast" key={item.hour}>
+                  <p className="hour">{item.hour}</p>
+                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
+                  <p className="temperature">{`${getTemperature(item.temperature, units.temperature)}°`}</p>
+                </li>
+              ))}
+            </ul>
+          </section>       
+        </>
+        }
       </main>
     </>
   )
