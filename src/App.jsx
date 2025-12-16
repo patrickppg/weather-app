@@ -3,12 +3,13 @@ import { getForecast, getLocation, getLocationSuggestions, getPrecipitation, get
 import debounce from 'lodash.debounce'
 import useMenuPattern from './hooks/useMenuPattern'
 import './App.css'
+import { DateTime } from 'luxon'
 
 function App() {
   const [units, setUnits] = useState(initialUnits)
   const [forecast, setForecast] = useState(initialForecast)
   const [locationSuggestions, setLocationSuggestions] = useState([])
-  const [selectedDay, setSelectedDay] = useState(0)
+  const [selectedDay, setSelectedDay] = useState(1)
   const [selectedSuggestionId, setSelectedSuggestionId] = useState("")
   const [isMenuUnitsOpen, setIsMenuUnitsOpen] = useState(false)
   const [isListboxSuggestionsOpen, setIsListboxSuggestionsOpen] = useState(false)
@@ -45,10 +46,18 @@ function App() {
     e.preventDefault()
 
     const location = await getLocation(e.target.elements["location"].value)
+    const forecast = location ? await getForecast(location) : null
  
     debouncedGetSuggestions.current.cancel()
     setIsListboxSuggestionsOpen(false)
-    setForecast(location ? await getForecast(location) : null)
+    setForecast(forecast)
+    if (forecast) {
+      setSelectedDay(DateTime.fromFormat(
+        forecast.today.date,
+        "cccc, LLL dd, yyyy",
+        { zone: location.timezone }
+      ).weekday)
+    }
   }
 
   const debouncedGetSuggestions = useRef(
@@ -311,16 +320,16 @@ function App() {
           <section id="forecast-hourly">
             <h2>Hourly forecast</h2>
             <select value={selectedDay} onChange={(e) => setSelectedDay(Number(e.target.value))}>
-              <option value="0">Monday</option>
-              <option value="1">Tuesday</option>
-              <option value="2">Wednesday</option>
-              <option value="3">Thursday</option>
-              <option value="4">Friday</option>
-              <option value="5">Saturday</option>
-              <option value="6">Sunday</option>
+              <option value="1">Monday</option>
+              <option value="2">Tuesday</option>
+              <option value="3">Wednesday</option>
+              <option value="4">Thursday</option>
+              <option value="5">Friday</option>
+              <option value="6">Saturday</option>
+              <option value="7">Sunday</option>
             </select>
             <ul>
-              {forecast.hourly[selectedDay].map(item => (
+              {forecast.hourly[selectedDay - 1].map(item => (
                 <li className="hourly-forecast" key={item.hour}>
                   <p className="hour">{item.hour}</p>
                   <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>

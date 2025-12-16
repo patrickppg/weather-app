@@ -181,6 +181,7 @@ export async function getLocation(searchInput) {
     country: location.country,
     latitude: location.latitude,
     longitude: location.longitude,
+    timezone: location.timezone,
   }
 }
 
