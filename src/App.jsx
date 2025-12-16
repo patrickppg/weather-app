@@ -45,10 +45,11 @@ function App() {
   async function handleSubmit(e) {
     e.preventDefault()
 
+    debouncedGetSuggestions.current.cancel()
+
     const location = await getLocation(e.target.elements["location"].value)
     const forecast = location ? await getForecast(location) : null
  
-    debouncedGetSuggestions.current.cancel()
     setIsListboxSuggestionsOpen(false)
     setForecast(forecast)
     if (forecast) {
@@ -72,9 +73,9 @@ function App() {
 
   function handleSearchChange(e) {
     if (e.target.value.length < 3) {
+      debouncedGetSuggestions.current.cancel()
       setLocationSuggestions([])
       setIsListboxSuggestionsOpen(false)
-      debouncedGetSuggestions.current.cancel()
     }
     else debouncedGetSuggestions.current(e.target.value)
   }
