@@ -56,15 +56,18 @@ export async function getForecast(location) {
     const params = new URLSearchParams()
     params.append("latitude", location.latitude)
     params.append("longitude", location.longitude)
-    params.append("current", "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation,weather_code")
+    params.append("current", "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation,weather_code,is_day")
     params.append("daily", "temperature_2m_max,temperature_2m_min,weather_code")
-    params.append("hourly", "temperature_2m,weather_code")
+    params.append("hourly", "temperature_2m,weather_code,is_day")
     params.append("timezone", "auto")
     
     const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
     const data = await response.json()
     const hourlyForecasts = data.hourly.time.map((_, i) => ({
-      condition: getCondition(data.hourly.weather_code[i]),
+      condition: getWeatherIcon({
+        code: data.hourly.weather_code[i],
+        isDay: data.hourly.is_day[i]
+      }),
       hour: getHour(data.hourly.time[i], data.timezone),
       temperature: Math.round(data.hourly.temperature_2m[i])
     }))
@@ -72,9 +75,13 @@ export async function getForecast(location) {
     const forecast = {
       today: {
         admin: location.admin,
-        condition: getCondition(data.current.weather_code),
+        condition: getWeatherIcon({
+          code: data.current.weather_code,
+          isDay: data.current.is_day,
+          isAnimated: true,
+        }),
         country: location.country,
-        date: getDate(data.current.time, data.timezone),
+        date: getDate(new Date().toISOString(), data.timezone),
         feelsLike: Math.round(data.current.apparent_temperature),
         humidity: data.current.relative_humidity_2m,
         name: location.name,
@@ -85,7 +92,7 @@ export async function getForecast(location) {
       },
       daily: data.daily.time.map((_, i) => ({
         day: getDay(data.daily.time[i], data.timezone),
-        condition: getCondition(data.daily.weather_code[i]),
+        condition: getWeatherIcon({ code: data.daily.weather_code[i], isDay: true, isAnimated: true }),
         maximum: Math.round(data.daily.temperature_2m_max[i]),
         minimum: Math.round(data.daily.temperature_2m_min[i]),
       })),
@@ -122,6 +129,8 @@ export function getDate(date, timezone) {
       month: "short",
       weekday: "long",
       year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     })
 }
 
@@ -185,69 +194,36 @@ export async function getLocation(searchInput) {
   }
 }
 
-export function getCondition(code) {
-  let url, alt
+export function getWeatherIcon({ code, isDay, isAnimated = false, format = "png" }) {
+  let url, alt, extension
+  const folder = isAnimated ? "animated" : "static"
+  if (isAnimated) extension = "svg"
+  else extension = format
 
-  switch (code) {
-    case 0:
-    case 1:
-      url = "/images/icon-sunny.webp"
-      alt = "clear sky"
-      break
-
-    case 2:
-      url = "/images/icon-partly-cloudy.webp"
-      alt = "partly cloudy"
-      break
-
-    case 3:
-      url = "/images/icon-overcast.webp"
-      alt = "overcast"
-      break
-
-    case 45:
-    case 48:
-      url = "/images/icon-fog.webp"
-      alt = "fog"
-      break
-
-    case 51:
-    case 53:
-    case 55:
-    case 56:
-    case 57:
-      url = "/images/icon-drizzle.webp"
-      alt = "drizzle"
-      break
-
-    case 61:
-    case 63:
-    case 65:
-    case 66:
-    case 67:
-    case 80:
-    case 81:
-    case 82:
-      url = "/images/icon-rain.webp"
-      alt = "rain"
-      break
-
-    case 71:
-    case 73:
-    case 75:
-    case 77:
-    case 85:
-    case 86:
-      url = "/images/icon-snow.webp"
-      alt = "snow"
-      break
-
-    case 95:
-    case 96:
-    case 99:
-      url = "/images/icon-storm.webp"
-      alt = "thunderstorms"
-      break
+  if ([0, 1].includes(code)) {
+    url = `/images/weather-icons/${folder}/${isDay ? "clear-day" : "clear-night"}.${extension}`
+    alt = "Clear Sky"
+  } else if (code === 2) {
+    url = `/images/weather-icons/${folder}/${isDay ? "partly-cloudy-day" : "partly-cloudy-night"}.${extension}`
+    alt = "Partly Cloudy"
+  } else if (code === 3) {
+    url = `/images/weather-icons/${folder}/overcast.${extension}`
+    alt = "Overcast"
+  } else if ([45, 48].includes(code)) {
+    url = `/images/weather-icons/${folder}/fog.${extension}`
+    alt = "Fog"
+  } else if ([51, 53, 55, 56, 57].includes(code)) {
+    url = `/images/weather-icons/${folder}/drizzle.${extension}`
+    alt = "Drizzle"
+  } else if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
+    url = `/images/weather-icons/${folder}/rain.${extension}`
+    alt = "Rain"
+  } else if ([71, 73, 75, 77, 85, 86].includes(code)) {
+    url = `/images/weather-icons/${folder}/snow.${extension}`
+    alt = "Snow"
+  } else if ([95, 96, 99].includes(code)) {
+    url = `/images/weather-icons/${folder}/thunderstorms.${extension}`
+    alt = "Thunderstorms"
   }
 
   return { url, alt }

@@ -38,6 +38,7 @@
 :root {
   background: hsl(var(--color-neutral-7));
   color: var(--color-neutral-1);
+  scrollbar-color: hsl(var(--color-neutral-4)) transparent;
   scrollbar-gutter: stable;
   
   --color-orange: 28, 100%, 52%;
@@ -103,10 +104,11 @@ main {
   gap: var(--spacing-10);
   grid:
     "search   search"
-    "overview hourly"
-    "details  hourly"
-    "daily    hourly"
+    "overview hourly" 18rem
+    "details  hourly" 7.375rem
+    "daily    hourly" 13.125rem
    / 1fr      24rem;
+  grid-auto-rows: minmax(0, max-content);
 }
 
 header#banner {
@@ -313,7 +315,6 @@ div#forecast-overview {
     "date     condition temperature"
    / 1fr      auto      auto;
   grid-area: overview;
-  height: 18rem;
   padding: var(--spacing-9);
 
   & p.location {
@@ -361,7 +362,7 @@ dl#forecast-details {
     display: flex;
     flex: 1;
     flex-flow: column;
-    gap: var(--spacing-9);
+    justify-content: space-between;
     padding: var(--spacing-8);
   }
 
@@ -377,11 +378,11 @@ dl#forecast-details {
 }
 
 section#forecast-daily {
-  align-items: start;
   display: flex;
   flex-flow: column;
   gap: var(--spacing-8);
   grid-area: daily;
+  height: fit-content;
 
   li.daily-forecast {
     background: hsl(var(--color-neutral-6));
@@ -432,7 +433,6 @@ section#forecast-daily {
 }
 
 section#forecast-hourly {
-  align-items: center;
   background: hsl(var(--color-neutral-6));
   border-radius: var(--radius-7);
   display: grid;
@@ -440,6 +440,10 @@ section#forecast-hourly {
   grid: auto 1fr / repeat(2, auto);
   grid-area: hourly;
   padding: var(--spacing-9);
+
+  h2 {
+    align-self: center;
+  }
 
   select, ::picker(select) {
     appearance: base-select;
@@ -496,18 +500,25 @@ section#forecast-hourly {
     border-radius: var(--radius-3);
     box-sizing: border-box;
     display: grid;
+    flex: none;
     gap: var(--spacing-4);
     grid: 
       "icon hour temperature"
      / auto 1fr  auto;
     height: 3.75rem;
     padding-inline: var(--spacing-7);
+    width: 100%;
 
     ul:has(> &) {
+      border-radius: var(--radius-3);
       display: flex;
       flex-flow: column;
       gap: var(--spacing-7);
       grid-column: span 2;
+      overflow: auto;
+      scrollbar-color: hsl(var(--color-neutral-4)) transparent;
+      scrollbar-gutter: stable;
+      scrollbar-width: none;
     }
 
     .icon {

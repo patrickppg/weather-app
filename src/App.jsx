@@ -18,6 +18,7 @@ function App() {
   const refMenu = useRef(null)
   const refListbox = useRef(null)
   const refSearchbox = useRef(null)
+  const refHourlyList = useRef(null)
   
   function handleMenuToggle(e) {
     if (e.newState === "closed") setIsMenuUnitsOpen(false)
@@ -46,16 +47,17 @@ function App() {
     e.preventDefault()
 
     debouncedGetSuggestions.current.cancel()
+    setIsListboxSuggestionsOpen(false)
 
     const location = await getLocation(e.target.elements["location"].value)
     const forecast = location ? await getForecast(location) : null
- 
-    setIsListboxSuggestionsOpen(false)
+
+    refHourlyList.current.scrollTo({ top: 0 })
     setForecast(forecast)
     if (forecast) {
       setSelectedDay(DateTime.fromFormat(
         forecast.today.date,
-        "cccc, LLL dd, yyyy",
+        "EEEE, LLL dd, yyyy, h:mm a",
         { zone: location.timezone }
       ).weekday)
     }
@@ -68,7 +70,7 @@ function App() {
       setSelectedSuggestionId("")
       if (suggestions.length) setIsListboxSuggestionsOpen(true)
       else setIsListboxSuggestionsOpen(false)
-    }, 1000)
+    }, 750)
   )
 
   function handleSearchChange(e) {
@@ -159,6 +161,11 @@ function App() {
     setIsListboxSuggestionsOpen(false)
     refSearchbox.current.value = ""
     refSearchbox.current.focus()
+  }
+
+  function handleSelectedDayChange(e) {
+    refHourlyList.current.scrollTo({ top: 0, behavior: "smooth" })
+    setSelectedDay(Number(e.target.value))
   }
   
   useEffect(() => {
@@ -296,7 +303,7 @@ function App() {
           <div id="forecast-overview">
             <p className="location">{`${forecast.today.name}, ${forecast.today.admin}`}<br />{forecast.today.country}</p>
             <p className="date">{forecast.today.date}</p>
-            <p className="condition"><img src={forecast.today.condition.url} alt={forecast.today.condition.alt} /></p>
+            <p className="condition"><img src={forecast.today.condition.url} alt={forecast.today.condition.alt} title={forecast.today.condition.alt} /></p>
             <p className="temperature">{`${getTemperature(forecast.today.temperature, units.temperature)}°`}</p>
           </div>
           <dl id="forecast-details" aria-description="forecast details">
@@ -311,16 +318,16 @@ function App() {
               {forecast.daily.map(item => (
                 <li className="daily-forecast" key={item.day}>
                   <p className="day">{item.day}</p>
-                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
-                  <p className="maximum"><span className="visually-hidden">Maximum of </span>{`${getTemperature(item.maximum, units.temperature)}°`}</p>
-                  <p className="minimum"><span className="visually-hidden">Minimum of </span>{`${getTemperature(item.minimum, units.temperature)}°`}</p>
+                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} title={item.condition.alt} /></p>
+                  <p className="maximum" title="Maximum"><span className="visually-hidden">Maximum of </span>{`${getTemperature(item.maximum, units.temperature)}°`}</p>
+                  <p className="minimum" title="Minimum"><span className="visually-hidden">Minimum of </span>{`${getTemperature(item.minimum, units.temperature)}°`}</p>
                 </li>
               ))}
             </ul>
           </section>
           <section id="forecast-hourly">
             <h2>Hourly forecast</h2>
-            <select value={selectedDay} onChange={(e) => setSelectedDay(Number(e.target.value))}>
+            <select value={selectedDay} onChange={handleSelectedDayChange}>
               <option value="1">Monday</option>
               <option value="2">Tuesday</option>
               <option value="3">Wednesday</option>
@@ -329,11 +336,11 @@ function App() {
               <option value="6">Saturday</option>
               <option value="7">Sunday</option>
             </select>
-            <ul>
+            <ul ref={refHourlyList}>
               {forecast.hourly[selectedDay - 1].map(item => (
                 <li className="hourly-forecast" key={item.hour}>
                   <p className="hour">{item.hour}</p>
-                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} /></p>
+                  <p className="icon"><img src={item.condition.url} alt={item.condition.alt} title={item.condition.alt} /></p>
                   <p className="temperature">{`${getTemperature(item.temperature, units.temperature)}°`}</p>
                 </li>
               ))}
