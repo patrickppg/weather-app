@@ -6,7 +6,6 @@ function useMenuPattern(refComposite) {
     const trigger = composite.previousElementSibling
     const items = [...composite.querySelectorAll(":is([role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'])")]
 
-    trigger.setAttribute("aria-haspopup", "menu")
     items.forEach((item, i) => {
       item.setAttribute("tabindex", "-1")
       if (i === 0) item.setAttribute("autofocus", "")

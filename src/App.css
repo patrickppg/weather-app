@@ -100,15 +100,13 @@ h2 {
 }
 
 main {
-  display: grid;
   gap: var(--spacing-10);
-  grid:
-    "search   search"
-    "overview hourly" 18rem
-    "details  hourly" 7.375rem
-    "daily    hourly" 13.125rem
-   / 1fr      24rem;
-  grid-auto-rows: minmax(0, max-content);
+  grid: minmax(0, max-content) 18rem 7.375rem 13.125rem / 1fr 24rem;
+  margin-inline: auto;
+  
+  &:not([hidden]) {
+    display: grid;
+  }
 }
 
 header#banner {
@@ -197,7 +195,8 @@ header#search {
   display: flex;
   flex-flow: column;
   gap: var(--spacing-13);
-  grid-area: search;
+  grid-column: 1 / -1;
+  grid-row: 1;
   place-self: center;
 
   search {
@@ -303,77 +302,88 @@ header#search {
   }
 }
 
-div#forecast-overview {
-  align-content: center;
-  background: url("/public/images/bg-today-large.svg") center / cover;
-  border-radius: var(--radius-7);
-  box-sizing: border-box;
+section#forecast-details {
   display: grid;
-  gap: var(--spacing-6) var(--spacing-8);
-  grid: 
-    "location condition temperature"
-    "date     condition temperature"
-   / 1fr      auto      auto;
-  grid-area: overview;
-  padding: var(--spacing-9);
+  grid: subgrid / subgrid;
+  grid-column: 1;
+  grid-row: 2 / 4;
+  
+  .overview {
+    align-content: center;
+    background: url("/public/images/bg-today-large.svg") center / cover;
+    border-radius: var(--radius-7);
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--spacing-6) var(--spacing-8);
+    grid: 
+      "location condition temperature"
+      "date     condition temperature"
+    / 1fr      auto      auto;
+    grid-column: 1;
+    grid-row: 1;
+    padding: var(--spacing-9);
 
-  & p.location {
-    font: var(--text-preset-4);
-    grid-area: location;
-    place-self: end start;
-  }
+    & p.location {
+      font: var(--text-preset-4);
+      grid-area: location;
+      outline-offset: 5px;
+      place-self: end start;
+    }
 
-  & p.date {
-    font: var(--text-preset-7);
-    grid-area: date;
-    opacity: .8;
-    place-self: start;
-  }
+    & p.date {
+      font: var(--text-preset-7);
+      grid-area: date;
+      opacity: .8;
+      place-self: start;
+    }
 
-  & p.condition {
-    grid-area: condition;
+    & p.condition {
+      grid-area: condition;
 
-    > img {
-      aspect-ratio: 1;
-      display: block;
-      height: 7.5rem;
+      > img {
+        aspect-ratio: 1;
+        height: 7.5rem;
+        vertical-align: middle;
+      }
+    }
+
+    & p.temperature {
+      font: var(--text-preset-1);
+      grid-area: temperature;
+      letter-spacing: -2px;
+      place-self: center;
     }
   }
 
-  & p.temperature {
-    font: var(--text-preset-1);
-    grid-area: temperature;
-    letter-spacing: -2px;
-    place-self: center;
-  }
-}
-
-dl#forecast-details {
-  display: flex;
-  gap: var(--spacing-9);
-  grid-area: details;
-
-  > div {
-    align-items: start;
-    background: hsl(var(--color-neutral-6));
-    border: 1px solid hsl(var(--color-neutral-4));
-    border-radius: var(--radius-5);
-    box-sizing: border-box;
+  .details {
     display: flex;
-    flex: 1;
-    flex-flow: column;
-    justify-content: space-between;
-    padding: var(--spacing-8);
-  }
+    gap: var(--spacing-9);
+    grid-column: 1;
+    grid-row: 2;
 
-  & dt {
-    color: hsl(var(--color-neutral-2));
-    font: var(--text-preset-7);
-    width: max-content;
-  }
+    > div {
+      align-items: start;
+      background: hsl(var(--color-neutral-6));
+      border: 1px solid hsl(var(--color-neutral-4));
+      border-radius: var(--radius-5);
+      box-sizing: border-box;
+      display: flex;
+      flex: 1;
+      flex-flow: column;
+      gap: var(--spacing-9);
+      justify-content: space-between;
+      padding: var(--spacing-8);
+    }
 
-  & dd {
-    font: var(--text-preset-3);
+    & dt {
+      color: hsl(var(--color-neutral-2));
+      font: var(--text-preset-7);
+      width: max-content;
+    }
+
+    & dd {
+      font: var(--text-preset-3);
+    }
   }
 }
 
@@ -381,7 +391,8 @@ section#forecast-daily {
   display: flex;
   flex-flow: column;
   gap: var(--spacing-8);
-  grid-area: daily;
+  grid-column: 1;
+  grid-row: 4;
   height: fit-content;
 
   li.daily-forecast {
@@ -390,18 +401,17 @@ section#forecast-daily {
     border-radius: var(--radius-5);
     box-sizing: border-box;
     display: grid;
-    flex: none;
+    flex: 1;
     gap: var(--spacing-7);
     grid: repeat(3, auto) / repeat(2, auto);
     justify-items: center;
     min-width: max-content;
     padding: var(--spacing-7);
-    width: calc((100% - (6 * var(--spacing-7))) / 7);
+    /* width: calc((100% - (6 * var(--spacing-7))) / 7); */
 
     ul:has(> &) {
       display: flex;
       gap: var(--spacing-7);
-      width: 100%;
     }
 
     .day {
@@ -414,8 +424,8 @@ section#forecast-daily {
 
       > img {
         aspect-ratio: 1;
-        display: block;
         height: 3.75rem;
+        vertical-align: middle;
       }
     }
 
@@ -438,7 +448,8 @@ section#forecast-hourly {
   display: grid;
   gap: var(--spacing-7);
   grid: auto 1fr / repeat(2, auto);
-  grid-area: hourly;
+  grid-column: 2;
+  grid-row: 2 / -1;
   padding: var(--spacing-9);
 
   h2 {
@@ -526,8 +537,8 @@ section#forecast-hourly {
 
       > img {
         aspect-ratio: 1;
-        display: block;
         height: 2.5rem;
+        vertical-align: middle;
       }
     }
 
@@ -571,6 +582,7 @@ section#forecast-hourly {
   :first-child {
     color: hsl(var(--color-neutral-1));
     font: var(--text-preset-2);
+    outline-offset: var(--spacing-4);
     width: fit-content;
   }
   
@@ -602,6 +614,7 @@ section#forecast-hourly {
   height: 1px;
   overflow: clip;
   position: absolute;
+  user-select: none;
   white-space: nowrap;
   width: 1px;
 }

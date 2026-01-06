@@ -44,7 +44,7 @@ export async function getLocationSuggestions(searchInput) {
     .map(suggestion => ({
       id: String(suggestion.id),
       name: suggestion.name,
-      admin: suggestion.admin1,
+      admin: (suggestion.admin1 === suggestion.name || suggestion.admin1.includes(suggestion.name)) ? null : suggestion.admin1,
       country: suggestion.country,
       latitude: suggestion.latitude,
       longitude: suggestion.longitude
@@ -122,22 +122,31 @@ export function getStructuredForecasts(forecasts) {
 }
 
 export function getDate(date, timezone) {
-  return DateTime.fromISO(date, { zone: timezone })
-    .setLocale("en-US")
-    .toLocaleString({
-      day: "numeric",
-      month: "short",
-      weekday: "long",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    })
+  return {
+    iso: DateTime
+      .fromISO(date)
+      .setZone(timezone)
+      .toISO(),
+    local: DateTime
+      .fromISO(date)
+      .setZone(timezone)
+      .setLocale("en-US")
+      .toLocaleString({
+        day: "numeric",
+        month: "short",
+        weekday: "long",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+    }),
+  }
 }
 
 export function getDay(date, timezone) {
-  return DateTime.fromISO(date, { zone: timezone })
-    .setLocale("en-US")
-    .toLocaleString({ weekday: "short" })
+  return {
+    short: DateTime.fromISO(date, { zone: timezone }).setLocale("en-US").toLocaleString({ weekday: "short" }),
+    long: DateTime.fromISO(date, { zone: timezone }).setLocale("en-US").toLocaleString({ weekday: "long" })
+  }
 }
 
 export function getHour(date, timezone) {
@@ -186,7 +195,7 @@ export async function getLocation(searchInput) {
   if (!location) return null
   return {
     name: location.name,
-    admin: location.admin1,
+    admin: (location.admin1 === location.name || location.admin1.includes(location.name)) ? null : location.admin1,
     country: location.country,
     latitude: location.latitude,
     longitude: location.longitude,
@@ -230,16 +239,16 @@ export function getWeatherIcon({ code, isDay, isAnimated = false, format = "png"
 }
 
 export function getTemperature(celsiusTemp, toScale) {
-  if (toScale === "c") return celsiusTemp
-  else if (toScale === "f") return Math.round(1.8 * celsiusTemp + 32)
+  if (toScale === "c") return `${String(celsiusTemp).replace('-', '−')}°`
+  else if (toScale === "f") return `${String(Math.round(1.8 * celsiusTemp + 32)).replace('-', '−')}°`
 }
 
 export function getWind(kmhWind, toScale) {
-  if (toScale === "km/h") return `${kmhWind}km/h`
-  else if (toScale === "mph") return `${Math.round(kmhWind * 0.621371)}mph`
+  if (toScale === "km/h") return `${kmhWind} km/h`
+  else if (toScale === "mph") return `${Math.round(kmhWind * 0.621371)} mph`
 }
 
 export function getPrecipitation(mmPrec, toScale) {
-  if (toScale === "mm") return `${mmPrec}mm`
-  else if (toScale === "in") return `${Math.round(mmPrec / 25.4)}in`
+  if (toScale === "mm") return `${mmPrec} mm`
+  else if (toScale === "in") return `${Math.round(mmPrec / 25.4)} in`
 }
