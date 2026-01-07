@@ -53,13 +53,14 @@ export async function getLocationSuggestions(searchInput) {
 
 export async function getForecast(location) {
   try {
-    const params = new URLSearchParams()
-    params.append("latitude", location.latitude)
-    params.append("longitude", location.longitude)
-    params.append("current", "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation,weather_code,is_day")
-    params.append("daily", "temperature_2m_max,temperature_2m_min,weather_code")
-    params.append("hourly", "temperature_2m,weather_code,is_day")
-    params.append("timezone", "auto")
+    const params = new URLSearchParams({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      current: "temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,precipitation,weather_code,is_day",
+      daily: "temperature_2m_max,temperature_2m_min,weather_code",
+      hourly: "temperature_2m,weather_code,is_day",
+      timezone: "auto"
+    })
     
     const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
     const data = await response.json()
@@ -100,8 +101,8 @@ export async function getForecast(location) {
     }
 
     return forecast
-  } catch (error) {
-    console.log(error)
+  } catch {
+    return
   }
 }
 
@@ -192,15 +193,59 @@ export async function getLocation(searchInput) {
     }
   }
 
-  if (!location) return null
-  return {
-    name: location.name,
-    admin: (location.admin1 === location.name || location.admin1.includes(location.name)) ? null : location.admin1,
-    country: location.country,
-    latitude: location.latitude,
-    longitude: location.longitude,
-    timezone: location.timezone,
+  if (location) {
+    return {
+      id: location.id,
+      name: location.name,
+      admin: (location.admin1 === location.name || location.admin1.includes(location.name)) ? null : location.admin1,
+      country: location.country,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      timezone: location.timezone,
+    }
+  } else return { search: searchInput }
+}
+
+export function getFallbackLocation() {
+  const defaultLocation = {
+    name: "London",
+    admin: "England",
+    country: "United Kingdom",
+    latitude: 51.50853,
+    longitude: -0.12574,
+    timezone: "Europe/London"
   }
+
+  return new Promise(resolve => {
+    if (!navigator.geolocation) {
+      resolve(defaultLocation)
+      return
+    }
+    
+    navigator.geolocation.getCurrentPosition(async position => {
+      try {
+        const params = new URLSearchParams({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        })
+        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?${params}`)
+        const data = await response.json()
+
+        resolve({
+          name: data.locality,
+          admin: data.principalSubdivision,
+          country: data.countryName,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        })
+      } catch {
+        resolve(defaultLocation)
+      }
+    }, () => resolve(defaultLocation),
+    { enableHighAccuracy: true, maximumAge: 600000 }
+  )
+  })
 }
 
 export function getWeatherIcon({ code, isDay, isAnimated = false, format = "png" }) {
@@ -211,44 +256,52 @@ export function getWeatherIcon({ code, isDay, isAnimated = false, format = "png"
 
   if ([0, 1].includes(code)) {
     url = `/images/weather-icons/${folder}/${isDay ? "clear-day" : "clear-night"}.${extension}`
-    alt = "Clear Sky"
+    alt = "clear sky"
   } else if (code === 2) {
     url = `/images/weather-icons/${folder}/${isDay ? "partly-cloudy-day" : "partly-cloudy-night"}.${extension}`
-    alt = "Partly Cloudy"
+    alt = "partly cloudy"
   } else if (code === 3) {
     url = `/images/weather-icons/${folder}/overcast.${extension}`
-    alt = "Overcast"
+    alt = "overcast"
   } else if ([45, 48].includes(code)) {
     url = `/images/weather-icons/${folder}/fog.${extension}`
-    alt = "Fog"
+    alt = "fog"
   } else if ([51, 53, 55, 56, 57].includes(code)) {
     url = `/images/weather-icons/${folder}/drizzle.${extension}`
-    alt = "Drizzle"
+    alt = "drizzle"
   } else if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) {
     url = `/images/weather-icons/${folder}/rain.${extension}`
-    alt = "Rain"
+    alt = "rain"
   } else if ([71, 73, 75, 77, 85, 86].includes(code)) {
     url = `/images/weather-icons/${folder}/snow.${extension}`
-    alt = "Snow"
+    alt = "snow"
   } else if ([95, 96, 99].includes(code)) {
     url = `/images/weather-icons/${folder}/thunderstorms.${extension}`
-    alt = "Thunderstorms"
+    alt = "thunderstorms"
   }
 
   return { url, alt }
 }
 
 export function getTemperature(celsiusTemp, toScale) {
+  if (celsiusTemp == null) return
   if (toScale === "c") return `${String(celsiusTemp).replace('-', '−')}°`
   else if (toScale === "f") return `${String(Math.round(1.8 * celsiusTemp + 32)).replace('-', '−')}°`
 }
 
+export function getHumidity(humidity) {
+  if (humidity == null) return
+  return `${humidity}%`
+}
+
 export function getWind(kmhWind, toScale) {
+  if (kmhWind == null) return 
   if (toScale === "km/h") return `${kmhWind} km/h`
   else if (toScale === "mph") return `${Math.round(kmhWind * 0.621371)} mph`
 }
 
 export function getPrecipitation(mmPrec, toScale) {
+  if (mmPrec == null) return
   if (toScale === "mm") return `${mmPrec} mm`
   else if (toScale === "in") return `${Math.round(mmPrec / 25.4)} in`
 }
