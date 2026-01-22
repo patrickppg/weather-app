@@ -193,17 +193,16 @@ export async function getLocation(searchInput) {
     }
   }
 
-  if (location) {
-    return {
-      id: location.id,
-      name: location.name,
-      admin: (location.admin1 === location.name || location.admin1.includes(location.name)) ? null : location.admin1,
-      country: location.country,
-      latitude: location.latitude,
-      longitude: location.longitude,
-      timezone: location.timezone,
-    }
-  } else return { search: searchInput }
+  if (!location || location.name === location.country) return { search: searchInput }
+  else return {
+    id: location.id,
+    name: location.name,
+    admin: (location.admin1 === location.name || location.admin1?.includes(location.name)) ? null : location.admin1,
+    country: location.country,
+    latitude: location.latitude,
+    longitude: location.longitude,
+    timezone: location.timezone,
+  }
 }
 
 export function getFallbackLocation() {
