@@ -1,0 +1,92 @@
+@media (max-width: 1436px) {
+  body {
+    max-width: 920px;
+  }
+  
+  main {
+    grid:
+      "search"
+      "details"
+      "daily"
+      "hourly";
+  }
+
+  section#forecast-details div.overview {
+    min-height: 18rem;
+  }
+
+  section#forecast-details li {
+    flex: none;
+    width: calc((920px - 3 * var(--spacing-9)) / 4);
+  }
+
+  section#forecast-daily ul {
+    flex-flow: wrap;
+  }
+
+  section#forecast-daily li {
+    flex: none;
+    width: calc((920px - 6 * var(--spacing-7)) / 7);
+  }
+
+  section#forecast-hourly {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: var(--spacing-7);
+  }
+
+  header#search form {
+    grid: repeat(2, 3.5rem) / auto;
+    height: unset;
+  }
+
+  section#forecast-daily ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, calc((920px - 6 * var(--spacing-7)) / 7));
+    justify-content: center;
+  }
+}
+
+@media (max-width: 500px) {
+  section#forecast-details ul {
+    justify-items: center;
+  }
+}
+
+@media (max-width: 400px) {
+  header#banner img.logo {
+    height: 2rem;
+  }
+
+  section#forecast-details img.condition {
+    height: 5rem;
+  }
+
+  section#forecast-details p.date {
+    font-size: 1rem;
+  }
+
+  section#forecast-details p.weather {
+    font-size: 4rem;
+  }
+
+  section#forecast-details span.label {
+    font-size: .9rem;
+  }
+  
+  section#forecast-details span.value {
+    font-size: 1.5rem;
+  }
+  
+  section#forecast-hourly {
+    grid: auto auto 1fr / auto;
+  }
+
+  section#forecast-hourly ul {
+    grid-column: unset;
+  }
+}

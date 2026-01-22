@@ -1,0 +1,468 @@
+:root {
+  background: hsl(var(--color-neutral-7));
+  color: hsl(var(--color-neutral-1));
+  scrollbar-color: hsl(var(--color-neutral-4)) transparent;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: auto;
+  max-width: 1340px;
+  padding: var(--spacing-12);
+}
+
+main {
+  display: grid;
+  gap: var(--spacing-10);
+  grid:
+    "search  search"
+    "details hourly" 1fr
+    "daily   hourly"
+   / 1fr ;
+  margin-inline: auto;
+}
+
+header#banner {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-13);
+  user-select: none;
+
+  @scope (&) {
+    button {
+      align-items: center;
+      anchor-name: --menu-units;
+      background: hsl(var(--color-neutral-6));
+      border-radius: var(--radius-3);
+      display: flex;
+      font: var(--text-preset-8);
+      gap: var(--spacing-5);
+      height: 2.625rem;
+      padding-inline: var(--spacing-7);
+      transition: background .15s;
+
+      &:hover, &:has(+ [role="menu"]:popover-open) {
+        background: hsl(var(--color-neutral-5));
+      }
+
+      &:has(+ [role="menu"]:popover-open) .icon-chevron {
+        rotate: 180deg;
+      }
+    }
+
+    [role="menu"] {
+      position-anchor: --menu-units;
+      position-area: bottom span-left;
+      top: var(--spacing-4);
+    }
+  }
+}
+
+header#search {
+  display: grid;
+  gap: var(--spacing-13);
+  grid-area: search;
+  justify-items: center;
+  justify-self: center;
+  user-select: none;
+
+  @scope (&) {
+    h1 {
+      font: var(--text-preset-2);
+      text-align: center;
+    }
+    
+    search {
+      display: grid;
+      font: var(--text-preset-6);
+      gap: var(--spacing-12);
+      max-width: 40rem;
+      width: 100%;
+    }
+
+    form {
+      color: hsl(var(--color-neutral-2));
+      display: grid;
+      gap: var(--spacing-7);
+      grid: auto / 1fr auto;
+      height: 3.5rem;
+    }
+
+    button.clear-field {
+      align-self: center;
+      place-self: center end;
+      position: absolute;
+      position-anchor: --input-search;
+      position-area: center;
+      translate: calc(-1 * var(--spacing-9));
+
+      input[name="location"]:placeholder-shown ~ & {
+        display: none;
+      }
+    }
+
+    button[type="submit"] {
+      background: hsl(var(--color-blue-light));
+      border-radius: var(--radius-5);
+      padding-inline: var(--spacing-9);
+      transition: background .15s;
+
+      &:hover {
+        background: hsl(var(--color-blue-dark));
+      }
+    }
+
+    svg.icon-search {
+      aspect-ratio: 1;
+      height: 1.25rem;
+      inset: 0;
+      place-self: center start;
+      pointer-events: none;
+      position: absolute;
+      position-area: center;
+      position-anchor: --input-search;
+      translate: var(--spacing-9);
+    }
+
+    [role="combobox"] {
+      anchor-name: --input-search;
+      background: hsl(var(--color-neutral-6));
+      border-radius: var(--radius-5);
+      box-sizing: border-box;
+      min-width: 0;
+      padding-inline: calc(var(--spacing-9) + 1.25rem + var(--spacing-7)) calc(var(--spacing-9) + 1.5rem + var(--spacing-7));
+    }
+
+    [role="listbox"] {
+      background: hsl(var(--color-neutral-6));
+      border-radius: var(--radius-5);
+      box-sizing: border-box;
+      color: hsl(var(--color-neutral-1));
+      display: grid;
+      font: var(--text-preset-8);
+      inset-block: var(--spacing-5);
+      max-height: calc(100% - 2 * var(--spacing-5));
+      overflow: auto;
+      padding: var(--spacing-4);
+      position: fixed;
+      position-anchor: --input-search;
+      position-area: bottom center;
+      scroll-padding: var(--spacing-4);
+      scrollbar-color: hsl(var(--color-neutral-4)) transparent;
+      scrollbar-width: thin;
+      width: 100%;
+
+      [role="option"] {
+        align-content: center;
+        border-radius: var(--radius-3);
+        padding: var(--spacing-5) var(--spacing-4);
+
+        &:hover, &[aria-selected="true"] {
+          background: hsl(var(--color-neutral-5));
+        }
+      }
+    }  
+
+    [role="alert"] {
+      font: var(--text-preset-4);
+      justify-self: center;
+      text-align: center;
+    }
+  }
+}
+
+section#forecast-details {
+  container: details / inline-size;
+  cursor: default;
+  display: grid;
+  gap: var(--spacing-10);
+  grid: 1fr auto / auto;
+  grid-area: details;
+  user-select: none;
+
+  @scope (&) {
+    div.overview {
+      background: url("/public/images/bg-today-large.svg") center / cover;
+      border-radius: var(--radius-7);
+      box-sizing: border-box;
+      display: grid;
+      font: var(--text-preset-7);
+      gap: var(--spacing-6);
+      grid:
+        "location weather"
+        "date     weather"
+       / 1fr      auto;
+      padding: var(--spacing-9);
+
+      &.loading {
+        background: hsl(var(--color-neutral-6));
+        color: hsl(var(--color-neutral-2));
+        grid: repeat(2, auto) / auto;
+        place-content: center;
+      }
+
+      @media (max-width: 820px) {
+        grid:
+          "location"
+          "date"
+          "weather";
+
+        p.location, p.date {
+          place-self: center;
+          text-align: center;
+        }
+      }
+    }
+
+    p.location {
+      font: var(--text-preset-4);
+      grid-area: location;
+      place-self: end start;
+    }
+
+    p.date {
+      grid-area: date;
+      opacity: .8;
+      place-self: start;
+    }
+
+    p.weather {
+      align-items: center;
+      display: flex;
+      font: var(--text-preset-1);
+      gap: var(--spacing-6);
+      grid-area: weather;
+      place-self: center;
+
+      > img {
+        aspect-ratio: 1;
+        height: 7.5rem;
+      }
+    }
+
+    ul.details {
+      display: flex;
+      flex-flow: wrap;
+      gap: var(--spacing-9);
+
+      @container details (width < 684px) {
+        justify-content: center;
+      }
+
+      > li {
+        align-content: space-between;
+        background: hsl(var(--color-neutral-6));
+        border: 1px solid hsl(var(--color-neutral-4));
+        border-radius: var(--radius-5);
+        box-sizing: border-box;
+        display: grid;
+        flex: 1;
+        height: 7.375rem;
+        justify-items: start;
+        padding: var(--spacing-8);
+
+        @container details (max-width: 448px) {
+          width: calc((100% - var(--spacing-9)) / 2) !important;
+        }
+      }
+    }
+
+    span.label {
+      color: hsl(var(--color-neutral-2));
+      font: var(--text-preset-7);
+      width: max-content;
+    }
+
+    span.value {
+      font: var(--text-preset-3);
+    }
+
+    img.icon-loading {
+      animation: icon-loading 1s steps(8) infinite;
+      aspect-ratio: 1;
+      height: 3rem;
+      justify-self: center;
+    }
+  }
+}
+
+section#forecast-daily {
+  cursor: default;
+  display: grid;
+  gap: var(--spacing-8);
+  grid-area: daily;
+  user-select: none;
+
+  @scope (&) {
+    h2 {
+      font: var(--text-preset-5);
+      width: max-content;
+    }
+
+    ul {
+      display: flex;
+      gap: var(--spacing-7);
+    }
+
+    li {
+      background: hsl(var(--color-neutral-6));
+      border: 1px solid hsl(var(--color-neutral-4));
+      border-radius: var(--radius-5);
+      box-sizing: border-box;
+      column-gap: var(--spacing-7);
+      display: grid;
+      flex: 1;
+      font: var(--text-preset-8);
+      grid:
+        "day       day"
+        "condition condition" 1fr
+        "maximum   minimum";
+      height: 10.3125rem;
+      justify-items: center;
+      padding: var(--spacing-7);
+    }
+
+    span.day {
+      font: var(--text-preset-7);
+      grid-area: day;
+    }
+
+    span.maximum {
+      grid-area: maximum;
+      justify-self: start;
+    }
+
+    span.minimum {
+      color: hsl(var(--color-neutral-2));
+      grid-area: minimum;
+      justify-self: end;
+    }
+
+    img.condition {
+      align-self: center;
+      aspect-ratio: 1;
+      grid-area: condition;
+      height: 3.75rem;
+    }
+  }
+}
+
+section#forecast-hourly {
+  background: hsl(var(--color-neutral-6));
+  border-radius: var(--radius-7);
+  box-sizing: border-box;
+  cursor: default;
+  display: grid;
+  gap: var(--spacing-7);
+  grid: auto 1fr / 1fr auto;
+  grid-area: hourly;
+  height: 43rem;
+  padding: var(--spacing-9);
+  user-select: none;
+  width: 24rem;
+
+  @scope (&) {
+    h2 {
+      align-self: center;
+      font: var(--text-preset-5);
+      width: max-content;
+    }
+
+    select {
+      justify-content: center;
+
+      &::picker(select) {
+        position-area: bottom span-left;
+      }
+    }
+
+    ul {
+      border-radius: var(--radius-3);
+      display: grid;
+      gap: var(--spacing-7);
+      grid-column: span 2;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+
+    li {
+      align-items: center;
+      background: hsl(var(--color-neutral-5));
+      border: 1px solid hsl(var(--color-neutral-4));
+      border-radius: inherit;
+      box-sizing: border-box;
+      display: grid;
+      gap: var(--spacing-4);
+      grid: auto / auto 1fr auto;
+      height: 3.75rem;
+      padding-inline: var(--spacing-7);
+    }
+
+    span.hour {
+      font: var(--text-preset-6);
+      justify-self: start;
+    }
+
+    span.temperature {
+      font: var(--text-preset-8);
+    }
+
+    img.condition {
+      aspect-ratio: 1;
+      height: 2.5rem;
+    }
+  }
+}
+
+div.error {
+  align-items: center;
+  flex-flow: column;
+  gap: var(--spacing-9);
+  justify-content: center;
+
+  &:not([hidden]) {
+    display: flex;
+  }
+  
+  &::before {
+    aspect-ratio: 1;
+    background: url("/public/images/icon-error.svg") center / cover;
+    content: "";
+    width: 42px;
+  }
+  
+  & strong {
+    color: hsl(var(--color-neutral-1));
+    font: var(--text-preset-2);
+    width: fit-content;
+
+    p:has(> &) {
+      outline: unset;
+      text-align: center;
+    }
+  }
+  
+  & p:last-of-type {
+    color: hsl(var(--color-neutral-2));
+    font: var(--text-preset-6);
+    max-width: 32rem;
+    text-align: center;
+  }
+
+  & button {
+    align-items: center;
+    background: hsl(var(--color-neutral-6));
+    border-radius: var(--radius-3);
+    display: flex;
+    font: var(--text-preset-8);
+    gap: var(--spacing-5);
+    height: 2.625rem;
+    padding-inline: var(--spacing-7);
+    transition: background .15s;
+
+    &:hover {
+      background: hsl(var(--color-neutral-5));
+    }
+  }
+}

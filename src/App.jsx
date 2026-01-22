@@ -3,7 +3,6 @@ import { getFallbackLocation, getForecast, getHumidity, getLocation, getLocation
 import debounce from 'lodash.debounce'
 import useMenuPattern from './hooks/useMenuPattern'
 import { DateTime } from 'luxon'
-import './App.css'
 
 function App() {
   const [units, setUnits] = useState(initialUnits)
@@ -283,14 +282,6 @@ function App() {
     }
   }, [error])
 
-  const details = (
-    `${forecast?.today?.name}, ` +
-    `${forecast?.today?.admin ? forecast.today.admin + ", " : ""}` +
-    `${forecast?.today?.country}. ` +
-    `${forecast?.today?.date.local}; ` +
-    `${forecast?.today?.condition.alt}, ${getTemperature(forecast?.today?.temperature, units.temperature)}.`
-  )
-
   const location = (
     `${forecast?.today?.name}, ` +
     `${forecast?.today?.admin ? forecast.today.admin + ", " : ""}` +
@@ -319,11 +310,11 @@ function App() {
   return (
     <>
       <header id="banner" inert={isErrorFocused}>
-        <img src="/images/logo.svg" alt="The Weather Now app" />
-        <button id="menu-units" popoverTarget="menu-items-popup" aria-haspopup="menu">
+        <img className="logo" src="/images/logo.svg" alt="The Weather Now app" />
+        <button popoverTarget="menu-items-popup" aria-haspopup="menu">
           <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M14.125 7.406c.031.407.031.813 0 1.188l1 .594a.74.74 0 0 1 .344.843c-.344 1.313-1.063 2.5-2 3.469-.25.219-.625.281-.906.125l-1-.594c-.25.188-.72.469-1.032.594v1.156a.733.733 0 0 1-.562.719A7.765 7.765 0 0 1 6 15.5c-.313-.063-.563-.406-.563-.719v-1.156a5.54 5.54 0 0 1-1.03-.594l-1 .594c-.282.156-.657.094-.907-.125-.938-.969-1.656-2.156-2-3.469a.74.74 0 0 1 .344-.844l1-.593c-.032-.156-.032-.406-.032-.594 0-.156 0-.406.032-.594l-1-.562A.74.74 0 0 1 .5 6c.344-1.313 1.063-2.5 2-3.469.25-.219.625-.281.906-.125l1 .594c.25-.188.719-.469 1.032-.594V1.25c0-.344.218-.625.562-.719a7.766 7.766 0 0 1 3.969 0c.312.063.562.406.562.719v1.156c.313.125.781.406 1.031.594l1-.594c.282-.156.657-.094.907.125.937.969 1.656 2.156 2 3.469a.74.74 0 0 1-.344.844l-1 .562Zm-1.656 2c.25-1.312.25-1.469 0-2.781l1.375-.781c-.188-.563-.688-1.375-1.063-1.813l-1.375.782c-.969-.844-1.125-.938-2.375-1.375V1.843C8.75 1.812 8.281 1.75 8 1.75c-.313 0-.781.063-1.063.094v1.593c-1.25.438-1.375.532-2.375 1.376L3.188 4.03c-.468.532-.812 1.157-1.062 1.813l1.375.781c-.25 1.313-.25 1.469 0 2.781l-1.375.781c.188.563.688 1.376 1.063 1.813l1.374-.781c.97.844 1.125.937 2.375 1.375v1.594c.282.03.75.093 1.063.093.281 0 .75-.062 1.031-.094v-1.593c1.25-.438 1.375-.531 2.375-1.375l1.375.781c.375-.438.875-1.25 1.063-1.813l-1.375-.78ZM8 5c1.625 0 3 1.375 3 3 0 1.656-1.375 3-3 3a3 3 0 0 1-3-3c0-1.625 1.344-3 3-3Zm0 4.5A1.5 1.5 0 0 0 9.5 8c0-.813-.688-1.5-1.5-1.5A1.5 1.5 0 0 0 6.5 8c0 .844.656 1.5 1.5 1.5Z"/></svg>
           Units
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="13" height="8" viewBox="0 0 13 8"><path d="M6.309 7.484 1.105 2.316c-.175-.14-.175-.421 0-.597l.704-.668a.405.405 0 0 1 .597 0l4.219 4.148 4.184-4.148c.175-.176.457-.176.597 0l.703.668c.176.176.176.457 0 .597L6.906 7.484a.405.405 0 0 1-.597 0Z"/></svg>  
+          <svg className="icon-chevron" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="13" height="8" viewBox="0 0 13 8"><path d="M6.309 7.484 1.105 2.316c-.175-.14-.175-.421 0-.597l.704-.668a.405.405 0 0 1 .597 0l4.219 4.148 4.184-4.148c.175-.176.457-.176.597 0l.703.668c.176.176.176.457 0 .597L6.906 7.484a.405.405 0 0 1-.597 0Z"/></svg>  
         </button>
         <div id="menu-items-popup" role="menu" popover="auto" ref={refMenu} onToggle={handleMenuToggle}>
           <div
@@ -331,7 +322,8 @@ function App() {
             onClick={handleSwitchUnitClick}>
             {`Switch to ${units.all === "metric" ? "Imperial" : "Metric"}`}
           </div>
-          <div role="group" aria-label="Temperature">
+          <div role="group" aria-labelledby="label-temperature">
+            <div id="label-temperature">Temperature</div>
             <div
               role="menuitemradio"
               aria-label="Celsius"
@@ -348,7 +340,8 @@ function App() {
             </div>
           </div>
           <div role="separator" />
-          <div role="group" aria-label="Wind Speed">
+          <div role="group" aria-labelledby="label-wind">
+            <div id="label-wind">Wind Speed</div>
             <div
               role="menuitemradio"
               aria-label="Kilometers per hour"
@@ -365,7 +358,8 @@ function App() {
             </div>
           </div>
           <div role="separator" />
-          <div role="group" aria-label="Precipitation">
+          <div role="group" aria-labelledby="label-precipitation">
+            <div id="label-precipitation">Precipitation</div>
             <div
               role="menuitemradio"
               aria-label="Millimeters"
@@ -406,58 +400,57 @@ function App() {
             <div className="visually-hidden" role="status">{forecast ? forecastStatusMessage : ""}</div>
             <search>
               <form ref={refForm} onSubmit={handleSubmit}>
-                <div>
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="Search for a place..."
-                    autoComplete="off"
-                    spellCheck="false"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    aria-controls="listbox-suggestions"
-                    aria-haspopup="listbox"
-                    aria-expanded={isListboxSuggestionsOpen}
-                    aria-activedescendant={selectedSuggestionId || null}
-                    ref={refSearchbox}
-                    onChange={handleSearchChange}
-                    onKeyDown={handleSearchKeyDown}
-                    onBlur={handleSearchBlur}
-                    onFocus={handleSearchFocus} />
-                  <button
-                    className="clear-field"
-                    type="button"
-                    aria-label="Clear Field"
-                    onClick={handleClearSearchClick}
-                    onMouseDown={e => e.preventDefault()}>
-                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
-                  </button>
-                  <div
-                    id="listbox-suggestions"
-                    role="listbox"
-                    aria-label="Suggestions"
-                    popover="manual"
-                    tabIndex="-1"
-                    ref={refListbox}
-                    onClick={handleSuggestionClick}
-                    onMouseDown={e => e.preventDefault()}
-                    onToggle={handleSuggestionsToggle}>
-                    {locationSuggestions.map(suggestion => (
-                      <div
-                        id={suggestion.id}
-                        role="option"
-                        tabIndex="-1"
-                        aria-selected={suggestion.id === selectedSuggestionId}
-                        key={suggestion.id}>
-                        {
-                          `${suggestion.name}, ` +
-                          `${suggestion.admin ? suggestion.admin + ", " : ""}` +
-                          `${suggestion.country}`
-                        }
-                      </div>
-                    ))}
-                  </div>
+                <svg className="icon-search" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21"><path d="M19.844 18.82c.195.196.195.508 0 .664l-.899.899c-.156.195-.468.195-.664 0l-4.726-4.727a.63.63 0 0 1-.117-.351v-.508c-1.446 1.21-3.282 1.953-5.313 1.953A8.119 8.119 0 0 1 0 8.625C0 4.172 3.633.5 8.125.5c4.453 0 8.125 3.672 8.125 8.125 0 2.031-.781 3.906-1.992 5.313h.508c.117 0 .234.078.351.156l4.727 4.726ZM8.125 14.875a6.243 6.243 0 0 0 6.25-6.25c0-3.438-2.813-6.25-6.25-6.25a6.243 6.243 0 0 0-6.25 6.25 6.219 6.219 0 0 0 6.25 6.25Z"/></svg>                  
+                <input
+                  type="text"
+                  name="location"
+                  placeholder="Search for a place..."
+                  autoComplete="off"
+                  spellCheck="false"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-controls="listbox-suggestions"
+                  aria-haspopup="listbox"
+                  aria-expanded={isListboxSuggestionsOpen}
+                  aria-activedescendant={selectedSuggestionId || null}
+                  ref={refSearchbox}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleSearchKeyDown}
+                  onBlur={handleSearchBlur}
+                  onFocus={handleSearchFocus} />
+                <div
+                  id="listbox-suggestions"
+                  role="listbox"
+                  aria-label="Suggestions"
+                  popover="manual"
+                  tabIndex="-1"
+                  ref={refListbox}
+                  onClick={handleSuggestionClick}
+                  onMouseDown={e => e.preventDefault()}
+                  onToggle={handleSuggestionsToggle}>
+                  {locationSuggestions.map(suggestion => (
+                    <div
+                      id={suggestion.id}
+                      role="option"
+                      tabIndex="-1"
+                      aria-selected={suggestion.id === selectedSuggestionId}
+                      key={suggestion.id}>
+                      {
+                        `${suggestion.name}, ` +
+                        `${suggestion.admin ? suggestion.admin + ", " : ""}` +
+                        `${suggestion.country}`
+                      }
+                    </div>
+                  ))}
                 </div>
+                <button
+                  className="clear-field"
+                  type="button"
+                  aria-label="Clear Field"
+                  onClick={handleClearSearchClick}
+                  onMouseDown={e => e.preventDefault()}>
+                  <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+                </button>
                 <button type="submit">Search</button>
               </form>
               {!error && !forecast &&
@@ -474,18 +467,18 @@ function App() {
               <div className={`overview${!forecast.today ? " loading" : ""}`}>
                 {forecast.today &&
                   <>
-                    <p className="visually-hidden">{details}</p>
-                    <div className="contents" aria-hidden="true">
-                      <span className="location">{location}</span>
-                      <span className="date">{forecast.today.date.local}</span>
-                      <img className="condition" src={forecast.today.condition.url} alt="" title={forecast.today.condition.alt} />
-                      <span className="temperature">{getTemperature(forecast.today.temperature, units.temperature)}</span>
-                    </div>
+                    <p className="location">{location}</p>
+                    <p className="date">{forecast.today.date.local}</p>
+                    <p className="weather">
+                      <span className="visually-hidden">{`${forecast.today.condition.alt}, ${getTemperature(forecast.today.temperature, units.temperature)}`}</span>
+                      <img aria-hidden="true" src={forecast.today.condition.url} alt="" title={forecast.today.condition.alt} />
+                      <span aria-hidden="true">{getTemperature(forecast.today.temperature, units.temperature)}</span>
+                    </p>
                   </>
                 }
                 {!forecast.today &&
                   <>
-                    <img src="/images/icon-loading.svg" alt="" />
+                    <img className="icon-loading" src="/images/icon-loading.svg" alt="" />
                     <span>Loading...</span>
                   </>
                 }
@@ -494,29 +487,29 @@ function App() {
                 <li>
                   <span className="visually-hidden">{`Feels like: ${getTemperature(forecast.today?.feelsLike, units.temperature)}`}</span>
                   <div className="contents" aria-hidden="true">
-                    <span>Feels Like</span>
-                    <span>{getTemperature(forecast.today?.feelsLike, units.temperature)}</span>
+                    <span className="label">Feels Like</span>
+                    <span className="value">{getTemperature(forecast.today?.feelsLike, units.temperature)}</span>
                   </div>
                 </li>
                 <li>
                   <span className="visually-hidden">{`Humidity: ${getHumidity(forecast.today?.humidity)}`}</span>
                   <div className="contents" aria-hidden="true">
-                    <span>Humidity</span>
-                    <span>{getHumidity(forecast.today?.humidity)}</span>
+                    <span className="label">Humidity</span>
+                    <span className="value">{getHumidity(forecast.today?.humidity)}</span>
                   </div>
                 </li>
                 <li>
                   <span className="visually-hidden">{`Wind: ${getWind(forecast.today?.wind, units.wind)}`}</span>
                   <div className="contents" aria-hidden="true">
-                    <span>Wind</span>
-                    <span>{getWind(forecast.today?.wind, units.wind)}</span>
+                    <span className="label">Wind</span>
+                    <span className="value">{getWind(forecast.today?.wind, units.wind)}</span>
                   </div>
                 </li>
                 <li>
                   <span className="visually-hidden">{`Precipitation: ${getPrecipitation(forecast.today?.precipitation, units.precipitation)}`}</span>
                   <div className="contents" aria-hidden="true">
-                    <span>Precipitation</span>
-                    <span>{getPrecipitation(forecast.today?.precipitation, units.precipitation)}</span>
+                    <span className="label">Precipitation</span>
+                    <span className="value">{getPrecipitation(forecast.today?.precipitation, units.precipitation)}</span>
                   </div>
                 </li>
               </ul>
@@ -527,13 +520,13 @@ function App() {
               <h2>Daily forecast</h2>
               <ul>
                 {forecast.daily.map((item, i) => (
-                  <li className="daily-forecast" key={item?.day.long || i}>
+                  <li key={item?.day.long || i}>
                     {item &&
                       <>
                         <span className="visually-hidden">{getDailyForecast(item)}</span>
                         <div className="contents" aria-hidden="true">
                           <span className="day">{item.day.short}</span>
-                          <img className="icon" src={item.condition.url} alt="" title={item.condition.alt} />
+                          <img className="condition" src={item.condition.url} alt="" title={item.condition.alt} />
                           <span className="maximum" title="maximum">{getTemperature(item.maximum, units.temperature)}</span>
                           <span className="minimum" title="minimum">{getTemperature(item.minimum, units.temperature)}</span>
                         </div>
@@ -558,13 +551,13 @@ function App() {
               </select>
               <ul ref={refHourlyList}>
                 {forecast.hourly[selectedDay - 1].map((item, i) => (
-                  <li className="hourly-forecast" key={item?.hour || i}>
+                  <li key={item?.hour || i}>
                     {item && 
                       <>
                         <span className="visually-hidden">{getHourlyForecast(item)}</span>
                         <div className="contents" aria-hidden="true">
+                          <img className="condition" src={item.condition.url} alt="" title={item.condition.alt} />
                           <span className="hour">{item.hour}</span>
-                          <img className="icon" src={item.condition.url} alt="" title={item.condition.alt} />
                           <span className="temperature">{getTemperature(item.temperature, units.temperature)}</span>
                         </div>
                       </>

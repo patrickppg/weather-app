@@ -1,73 +1,72 @@
-body {
-  margin: unset;
-}
+@layer unset, global, components, conditionals;
 
-dl {
-  margin: unset;
-}
+@import "/src/styles/global.css" layer(global);
+@import "/src/styles/components.css" layer(components);
+@import "/src/styles/conditionals.css" layer(conditionals);
 
-dd {
-  margin: unset;
-}
-
-h1, h2 {
-  margin: unset;
-}
-
-p {
-  margin: unset;
-}
-
-ul {
-  margin: unset;
-  padding: unset;
-}
-
-button {
-  background: unset;
-  border: unset;
-  color: unset;
-  /* cursor: pointer; */
-  font: unset;
-  padding: unset;
-}
-
-input {
-  background: unset;
-  border: unset;
-  font: unset;
-  padding: unset;
-
-  &::placeholder {
-    color: unset;
-    font: inherit;
+@layer unset {
+  h1, h2, h3, h4, h5, h6 {
+    margin: unset;
   }
-}
 
-svg {
-  fill: currentColor;
-}
+  p {
+    margin: unset;
+  }
 
-body {
-  margin-inline: auto;
-  max-width: 1240px;
-  padding: var(--spacing-12);
-}
+  ol, ul, menu {
+    margin: unset;
+    padding: unset;
+  }
 
-select {
-  border: unset;
-  color: unset;
-  /* cursor: pointer; */
-  font: unset;
-}
+  button {
+    background: unset;
+    border: unset;
+    color: unset;
+    font: unset;
+    padding: unset;
+  }
 
-option {
-  color: unset;
-  font: unset;
-}
+  input {
+    background: unset;
+    border: unset;
+    color: unset;
+    font: unset;
+    padding: unset;
 
-[popover] {
-  border: unset;
-  color: unset;
-  margin: unset;
+    &::placeholder {
+      color: unset;
+      font: unset;
+    }
+  }
+
+  select {
+    border: unset;
+    color: unset;
+    font: unset;
+    padding: unset;
+
+    &::picker-icon {
+      margin: unset;
+    }
+
+    &::picker(select) {
+      color: unset;
+    }
+  }
+
+  option {
+    color: unset;
+    font: unset;
+    outline: unset;
+
+    &::checkmark {
+      content: unset;
+    }
+  }
+
+  [popover] {
+    border: unset;
+    color: unset;
+    margin: unset;
+  }
 }
