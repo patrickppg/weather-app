@@ -25,6 +25,7 @@ function App() {
   const refError = useRef(null)
   const refShouldFocusSearchbox = useRef(false)
   const refPreviousLocationId = useRef(null)
+  const refAbortController = useRef(null)
   
   function handleMenuToggle(e) {
     if (e.newState === "closed") setIsMenuUnitsOpen(false)
@@ -59,15 +60,20 @@ function App() {
     setIsListboxSuggestionsOpen(false)
     setSelectedSuggestionId("")
 
+    refAbortController.current?.abort()
+    const controller = new AbortController()
+    refAbortController.current = controller
+
     let location, forecast
     try {
-      location = await getLocation(locationInputEl.value)
+      location = await getLocation(locationInputEl.value, controller.signal)
       if (location?.id === refPreviousLocationId.current) return
       if (location?.search === refPreviousLocationId.current) return
       refPreviousLocationId.current = location.id || location.search
       
       forecast = location?.id ? await getForecast(location) : null
     } catch (error) {
+      if (error.name === "AbortError") return
       refPreviousLocationId.current = null
       setError(error)
     }
@@ -253,10 +259,14 @@ function App() {
   useEffect(() => {
     if (!error) {
       async function getInitialForecast() {
+        refAbortController.current?.abort()
+        const controller = new AbortController()
+        refAbortController.current = controller
+        
         setForecast(initialForecast)
         try {
           const fallbackLocation = await getFallbackLocation()
-          const forecast = await getForecast(fallbackLocation)
+          const forecast = await getForecast(fallbackLocation, controller.signal)
 
           if (forecast) {
             setForecast(forecast)

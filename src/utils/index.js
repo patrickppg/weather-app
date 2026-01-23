@@ -51,7 +51,7 @@ export async function getLocationSuggestions(searchInput) {
     }))
 }
 
-export async function getForecast(location) {
+export async function getForecast(location, signal) {
   try {
     const params = new URLSearchParams({
       latitude: location.latitude,
@@ -62,7 +62,7 @@ export async function getForecast(location) {
       timezone: "auto"
     })
     
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`)
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`, { signal })
     const data = await response.json()
     const hourlyForecasts = data.hourly.time.map((_, i) => ({
       condition: getWeatherIcon({
@@ -156,14 +156,14 @@ export function getHour(date, timezone) {
     .toLocaleString({ hour: "numeric" })
 }
 
-export async function getLocation(searchInput) {
+export async function getLocation(searchInput, signal) {
   const parts = searchInput.split(",")
 
   let search, location
   switch (parts.length) {
     case 1: {
       search = parts[0].trim()
-      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`, { signal })
       const data = await response.json()
       location = data.results?.[0]
       break
@@ -171,13 +171,13 @@ export async function getLocation(searchInput) {
 
     case 2: {
       search = `${parts[0].trim()}, ${parts[1].trim()}`
-      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`, { signal })
       const data = await response.json()
 
       if (data.results) location = data.results?.[0]
       else {
         search = parts[0].trim()
-        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+        const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`, { signal })
         const data = await response.json()
         location = data.results?.find(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
       }
@@ -186,7 +186,7 @@ export async function getLocation(searchInput) {
 
     case 3: {
       search = `${parts[0].trim()}, ${parts[2].trim()}`
-      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`)
+      const response = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${search}&count=10`, { signal })
       const data = await response.json()
       location = data.results?.find(res => res.admin1.toLowerCase() === parts[1].toLowerCase().trim())
       break
@@ -242,7 +242,7 @@ export function getFallbackLocation() {
         resolve(defaultLocation)
       }
     }, () => resolve(defaultLocation),
-    { enableHighAccuracy: true, maximumAge: 600000 }
+    { enableHighAccuracy: true, maximumAge: 300_000, timeout: 15_000 }
   )
   })
 }
