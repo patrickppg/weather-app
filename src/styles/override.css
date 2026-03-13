@@ -1,0 +1,22 @@
+[hidden] {
+  display: none;
+}
+
+[popover]:not(:popover-open) {
+  display: none;
+}
+
+.contents {
+  display: contents;
+}
+
+.visually-hidden {
+  clip-path: inset(50%);
+  height: 1px;
+  inset: 0;
+  overflow: clip;
+  position: absolute;
+  user-select: none;
+  white-space: nowrap;
+  width: 1px;
+}

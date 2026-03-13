@@ -3,33 +3,32 @@
     max-width: 920px;
   }
   
-  main {
+  #view {
     grid:
-      "search"
       "details"
       "daily"
       "hourly";
   }
 
-  section#forecast-details div.overview {
+  [role="region"].details div.overview {
     min-height: 18rem;
   }
 
-  section#forecast-details li {
+  [role="region"].details dl > div {
     flex: none;
     width: calc((920px - 3 * var(--spacing-9)) / 4);
   }
 
-  section#forecast-daily ul {
+  [role="region"].daily ul {
     flex-flow: wrap;
   }
 
-  section#forecast-daily li {
+  [role="region"].daily ul > li {
     flex: none;
     width: calc((920px - 6 * var(--spacing-7)) / 7);
   }
 
-  section#forecast-hourly {
+  [role="region"].hourly {
     width: 100%;
   }
 }
@@ -39,12 +38,12 @@
     padding: var(--spacing-7);
   }
 
-  header#search form {
+  #search form {
     grid: repeat(2, 3.5rem) / auto;
     height: unset;
   }
 
-  section#forecast-daily ul {
+  [role="region"].daily ul {
     display: grid;
     grid-template-columns: repeat(auto-fit, calc((920px - 6 * var(--spacing-7)) / 7));
     justify-content: center;
@@ -52,7 +51,19 @@
 }
 
 @media (max-width: 500px) {
-  section#forecast-details ul {
+  [role="region"].details p.date {
+    font-size: 1rem;
+  }
+
+  [role="region"].details img.condition {
+    height: 5rem;
+  }
+
+  [role="region"].details p.temperature {
+    font-size: 4rem;
+  }
+
+  [role="region"].details dl {
     justify-items: center;
   }
 }
@@ -62,31 +73,19 @@
     height: 2rem;
   }
 
-  section#forecast-details img.condition {
-    height: 5rem;
-  }
-
-  section#forecast-details p.date {
-    font-size: 1rem;
-  }
-
-  section#forecast-details p.weather {
-    font-size: 4rem;
-  }
-
-  section#forecast-details span.label {
+  [role="region"].details dt {
     font-size: .9rem;
   }
   
-  section#forecast-details span.value {
+  [role="region"].details dd {
     font-size: 1.5rem;
   }
   
-  section#forecast-hourly {
+  [role="region"].hourly {
     grid: auto auto 1fr / auto;
   }
 
-  section#forecast-hourly ul {
+  [role="region"].hourly ul {
     grid-column: unset;
   }
 }

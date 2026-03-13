@@ -1,8 +1,9 @@
-@layer unset, global, components, conditionals;
+@layer unset, global, components, conditionals, override;
 
 @import "/src/styles/global.css" layer(global);
 @import "/src/styles/components.css" layer(components);
 @import "/src/styles/conditionals.css" layer(conditionals);
+@import "/src/styles/override.css" layer(override);
 
 @layer unset {
   h1, h2, h3, h4, h5, h6 {
@@ -16,6 +17,10 @@
   ol, ul, menu {
     margin: unset;
     padding: unset;
+  }
+
+  dl, dt, dd {
+    margin: unset;
   }
 
   button {

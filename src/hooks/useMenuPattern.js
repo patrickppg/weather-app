@@ -1,60 +1,69 @@
-import { useEffect } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
 
-function useMenuPattern(refComposite) {
-  useEffect(() => {
-    const composite = refComposite.current
-    const trigger = composite.previousElementSibling
-    const items = [...composite.querySelectorAll(":is([role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'])")]
+function useMenuPattern(refMenu) {
+  const refMenuitems = useRef(null)
+  
+  useLayoutEffect(() => {
+    if (!refMenu.current) return
+    const menu = refMenu.current
+    const menuButton = document.querySelector(`[aria-controls="${menu.id}"]`)
+    const menuitems = [...menu.querySelectorAll(":is([role='menuitem'], [role='menuitemradio'], [role='menuitemcheckbox'])")]
+    refMenuitems.current = menuitems
 
-    items.forEach((item, i) => {
+    menuButton.setAttribute("popovertarget", menu.id)
+    menuButton.setAttribute("aria-haspopup", "menu")
+    menu.setAttribute("popover", "auto")
+    menuitems.forEach((item, i) => {
       item.setAttribute("tabindex", "-1")
       if (i === 0) item.setAttribute("autofocus", "")
     })
 
-    composite.addEventListener("click", handleClick)
-    composite.addEventListener("focusout", handleFocusOut)
-    composite.addEventListener("keydown", handleKeyDown)
-    trigger.addEventListener("mousedown", handleMouseDown)
+    menu.addEventListener("click", handleClick)
+    menu.addEventListener("focusout", handleFocusOut)
+    menu.addEventListener("keydown", handleKeyDown)
+    menuButton.addEventListener("mousedown", handleMouseDown)
 
 
 
-    // Close the menu when a menuitem is activated
     function handleClick(e) {
-      if (e.target.role === "menuitem") composite.hidePopover()
+      switch (e.target.role) {
+        case "menuitem": menu.hidePopover(); break
+        case "menuitemradio": checkRadioInGroup(e.target); break
+        case "menuitemcheckbox": e.target.setAttribute("aria-checked", e.target.ariaChecked === "true" ? "false" : "true")
+      }
     }
 
   
   
-    // Close the menu when it loses focus
     function handleFocusOut(e) {
-      if (!e.currentTarget.contains(e.relatedTarget) && document.contains(e.relatedTarget)) composite.hidePopover()
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        setTimeout(() => {
+          if (document.hasFocus()) menu.hidePopover()
+        }, 0);
+      }
     }
 
 
 
-    // Implement keyboard interaction
-    const handledKeys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "PageUp", "PageDown", "Space", "Enter"]
+    const handledKeys = ["ArrowUp", "ArrowDown", "Home", "End", "Space", "Enter"]
     function handleKeyDown(e) {
-      const key = e.code
-      if (!handledKeys.includes(key)) return
+      if (!handledKeys.includes(e.code)) return
       e.preventDefault()
 
-      const currentItem = document.activeElement
-      const firstItem = items[0]
-      const lastItem = items.at(-1)
-      const previousItem = currentItem === firstItem ? lastItem : items[items.indexOf(currentItem) - 1]
-      const nextItem = currentItem === lastItem ? firstItem : items[items.indexOf(currentItem) + 1]
+      const focusedItem = document.activeElement
+      const firstItem = menuitems[0]
+      const lastItem = menuitems.at(-1)
+      const previousItem = focusedItem === firstItem ? lastItem : menuitems[menuitems.indexOf(focusedItem) - 1]
+      const nextItem = focusedItem === lastItem ? firstItem : menuitems[menuitems.indexOf(focusedItem) + 1]
       let targetItem
 
-      switch (key) {
+      switch (e.code) {
         case "ArrowUp": targetItem = previousItem; break
         case "ArrowDown": targetItem = nextItem; break
-        case "Home":
-        case "PageUp": targetItem = firstItem; break
-        case "End":
-        case "PageDown": targetItem = lastItem; break
-        case "Space": currentItem.click(); break
-        case "Enter": currentItem.click(); composite.hidePopover()
+        case "Home": targetItem = firstItem; break
+        case "End": targetItem = lastItem; break
+        case "Space": focusedItem.click(); break
+        case "Enter": focusedItem.click(); menu.hidePopover()
       }
 
       if (targetItem) targetItem.focus()
@@ -62,20 +71,44 @@ function useMenuPattern(refComposite) {
 
 
 
-    // Prevent the menu from immediately reopening when its menu button is clicked while it is open
     function handleMouseDown(e) {
-      if (e.currentTarget.nextElementSibling.matches(":popover-open")) e.preventDefault()
+      if (menu.matches(":popover-open")) e.preventDefault()
     }
 
 
 
     return () => {
-      composite.removeEventListener("click", handleClick)
-      composite.removeEventListener("focusout", handleFocusOut)
-      composite.removeEventListener("keydown", handleKeyDown)
-      trigger.removeEventListener("mousedown", handleMouseDown)
+      menu.removeEventListener("click", handleClick)
+      menu.removeEventListener("focusout", handleFocusOut)
+      menu.removeEventListener("keydown", handleKeyDown)
+      menuButton.removeEventListener("mousedown", handleMouseDown)
     }
-  }, [refComposite])
+  }, [refMenu])
+
+
+
+  useEffect(() => {
+    if (!refMenuitems.current) return
+    refMenuitems.current.forEach((item) => {
+      if (item.role === "menuitemradio" || item.role === "menuitemcheckbox") {
+        if (item.classList.contains("checked")) {
+          item.setAttribute("aria-checked", "true")
+        } else item.setAttribute("aria-checked", "false")
+      }
+    })
+  })
+}
+
+
+
+function checkRadioInGroup(activatedRadio) {
+  const group =
+    activatedRadio.closest("[role='menu'] [role='group']") ||
+    activatedRadio.closest("[role='menu']")
+  const checkedRadio = group.querySelector("[aria-checked='true']")
+
+  if (checkedRadio) checkedRadio.setAttribute("aria-checked", "false")
+  activatedRadio.setAttribute("aria-checked", "true")
 }
 
 export default useMenuPattern

@@ -191,7 +191,7 @@ select:not([multiple]):is(:not([size]), [size="1"]) {
   gap: var(--spacing-5);
   justify-content: space-between;
 
-  &[aria-checked="true"]::after {
+  &.checked::after {
     content: url("/public/images/icon-checkmark.svg");
   }
 }
@@ -214,29 +214,6 @@ svg {
   vertical-align: middle;
 }
 
-[hidden] {
-  display: none !important;
-}
-
-[popover]:not(:popover-open) {
-  display: none !important;
-}
-
-.contents {
-  display: contents;
-}
-
-.visually-hidden {
-  clip-path: inset(50%);
-  height: 1px;
-  inset: 0;
-  overflow: clip;
-  position: absolute;
-  user-select: none;
-  white-space: nowrap;
-  width: 1px;
-
-  :has(> &) {
-    position: relative;
-  }
+:has(> .visually-hidden) {
+  position: relative;
 }
